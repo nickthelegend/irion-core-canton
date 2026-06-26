@@ -97,11 +97,11 @@ export default function SupportPage() {
                             </div>
                             <div className="overflow-y-auto max-h-[580px] scrollbar-hide">
                                 {[
-                                    { title: "STAKING_MECHANICS_V1", desc: "Optimization protocols for maximum yield accrual within the XORR lending ecosystem.", icon: BookOpen },
+                                    { title: "STAKING_MECHANICS_V1", desc: "Optimization protocols for maximum yield accrual within the IRION lending ecosystem.", icon: BookOpen },
                                     { title: "REPAYMENT_LOGIC", desc: "Understanding automated BNPL settlements and health factor protection thresholds.", icon: Calculator },
                                     { title: "NETWORK_LATENCY_FAQ", desc: "Diagnostics for inter-chain settlement delay and RPC endpoint synchronization.", icon: Monitor },
                                     { title: "VAULT_ARCHITECTURE_SEC", desc: "Overview of L3 secure vault implementations and collateral isolation layers.", icon: Shield },
-                                    { title: "SUI_WALLET_SETUP", desc: "Documentation on connecting a Sui wallet and getting testnet USDC.", icon: LinkIcon }
+                                    { title: "STELLAR_WALLET_SETUP", desc: "Documentation on connecting a Stellar wallet and getting testnet USDC.", icon: LinkIcon }
                                 ].map((item, idx) => (
                                     <div key={idx} className="p-4 border-b border-white/5 hover:bg-primary/5 transition-colors cursor-pointer group">
                                         <div className="flex items-start justify-between">
@@ -132,7 +132,7 @@ export default function SupportPage() {
                                 </h3>
                             </div>
                             <p className="text-white/70 text-[11px] leading-relaxed font-mono uppercase">
-                                <span className="text-primary font-bold">[!]</span> Maintenance scheduled for <span className="text-white font-bold">SUI_TESTNET</span> in 12 hours. Some operations may experience elevated latency.
+                                <span className="text-primary font-bold">[!]</span> Maintenance scheduled for <span className="text-white font-bold">STELLAR_TESTNET</span> in 12 hours. Some operations may experience elevated latency.
                             </p>
                         </div>
                     </section>

@@ -20,13 +20,13 @@ export default function PoolPairPage({ params }: { params: Promise<{ pair: strin
           <TokenIcon symbol={symbol} size={36} className="flex-shrink-0" />
           <div className="text-left">
             <h1 className="text-2xl font-black uppercase tracking-tighter">{symbol} Pool</h1>
-            <p className="text-[10px] text-foreground/40 uppercase tracking-widest">XORR Money Market</p>
+            <p className="text-[10px] text-foreground/40 uppercase tracking-widest">IRION Money Market</p>
           </div>
         </div>
 
         <p className="text-sm text-foreground/50 leading-relaxed max-w-md">
-          XORR runs a single unified USDC lending pool on Sui. Supply, borrow, repay, and manage collateral —
-          including unsecured TEE-backed credit — all happen in the money market.
+          IRION runs a single unified USDC lending pool on Stellar. Supply, borrow, repay, and manage collateral —
+          including unsecured zero-knowledge-backed credit — all happen in the money market.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">

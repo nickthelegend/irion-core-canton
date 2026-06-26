@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "XORR Finance — Buy Now, Pay Never";
+export const alt = "IRION Finance — Buy Now, Pay Never";
 export const size = {
   width: 1200,
   height: 630,
@@ -41,7 +41,7 @@ export default async function Image() {
             letterSpacing: "4px",
           }}
         >
-          <span>XORR // PRIVATE_CREDIT_PROTOCOL</span>
+          <span>IRION // PRIVATE_CREDIT_PROTOCOL</span>
           <span>STATUS: ACTIVE</span>
         </div>
 
@@ -64,7 +64,7 @@ export default async function Image() {
               alignItems: "center",
             }}
           >
-            XORR <span style={{ color: "#a6f24a", marginLeft: "16px" }}>FINANCE</span>
+            IRION <span style={{ color: "#a6f24a", marginLeft: "16px" }}>FINANCE</span>
           </div>
 
           <div
@@ -87,7 +87,7 @@ export default async function Image() {
               textAlign: "center",
             }}
           >
-            Private consumer credit on Sui — BNPL, lending, and a credit score that never leaves a TEE.
+            Private consumer credit on Stellar — BNPL, lending, and a credit score proven with a zero-knowledge proof.
           </div>
         </div>
 
@@ -105,8 +105,8 @@ export default async function Image() {
             fontSize: "16px",
           }}
         >
-          <span>SECURED BY CONFIDENTIAL TEE ENCLAVE</span>
-          <span>APP.XORR.FINANCE</span>
+          <span>SECURED BY ZERO-KNOWLEDGE PROOF</span>
+          <span>APP.IRION.FINANCE</span>
         </div>
       </div>
     ),

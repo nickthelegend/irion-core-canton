@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "XORR Finance — Private TEE Credit";
+export const alt = "IRION Finance — Private Zero-Knowledge Credit";
 export const size = {
   width: 1200,
   height: 630,
@@ -41,7 +41,7 @@ export default async function Image() {
             letterSpacing: "4px",
           }}
         >
-          <span>XORR // TEE_ENCLAVE</span>
+          <span>IRION // ZK_PROOF</span>
           <span>STATUS: SECURE</span>
         </div>
 
@@ -64,7 +64,7 @@ export default async function Image() {
               alignItems: "center",
             }}
           >
-            PRIVATE <span style={{ color: "#a6f24a", marginLeft: "16px" }}>TEE CREDIT</span>
+            PRIVATE <span style={{ color: "#a6f24a", marginLeft: "16px" }}>ZK CREDIT</span>
           </div>
 
           <div
@@ -75,7 +75,7 @@ export default async function Image() {
               letterSpacing: "1px",
             }}
           >
-            Confidential Credit Scoring on Sui
+            Zero-Knowledge Credit Scoring on Stellar
           </div>
 
           <div
@@ -87,7 +87,7 @@ export default async function Image() {
               textAlign: "center",
             }}
           >
-            Score computed inside a secure, hardware-isolated AWS Nitro Enclave. Your data never leaves the TEE.
+            Score proven with a secure zero-knowledge proof. Your data never leaves your device.
           </div>
         </div>
 
@@ -105,8 +105,8 @@ export default async function Image() {
             fontSize: "16px",
           }}
         >
-          <span>XORR FINANCE</span>
-          <span>APP.XORR.FINANCE/CREDIT</span>
+          <span>IRION FINANCE</span>
+          <span>APP.IRION.FINANCE/CREDIT</span>
         </div>
       </div>
     ),

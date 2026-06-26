@@ -25,9 +25,9 @@ export default function TermsPage() {
                         </div>
                         <div className="p-8 md:p-12 overflow-y-auto max-h-[750px] scrollbar-hide font-mono text-xs text-white/70 leading-relaxed">
                             <div className="border-b border-white/5 pb-8 mb-8">
-                                <h2 className="text-white text-base font-bold mb-4 uppercase">XORR_PROTOCOL_USER_AGREEMENT</h2>
+                                <h2 className="text-white text-base font-bold mb-4 uppercase">IRION_PROTOCOL_USER_AGREEMENT</h2>
                                 <p className="text-white/40 text-[10px] leading-relaxed italic">
-                                    Last Updated: October 12, 2024. Please read this Service Agreement carefully. By accessing or using the XORR Protocol, you acknowledge that you have read, understood, and agree to be bound by these terms. This document constitutes a legally binding agreement between you and the XORR Decentralized Autonomous Organization.
+                                    Last Updated: October 12, 2024. Please read this Service Agreement carefully. By accessing or using the IRION Protocol, you acknowledge that you have read, understood, and agree to be bound by these terms. This document constitutes a legally binding agreement between you and the IRION Decentralized Autonomous Organization.
                                 </p>
                             </div>
 
@@ -37,7 +37,7 @@ export default function TermsPage() {
                                         <span>{`>>`}</span> 01_PROTOCOL_USAGE
                                     </h3>
                                     <p>
-                                        The XORR Protocol provides a decentralized platform for crypto-collateralized buy-now-pay-later (BNPL) services. Users may interact with the protocol via smart contracts deployed on supported blockchain networks. Access to the protocol is provided on an "as-is" basis, and users are solely responsible for managing their private keys and wallet interactions.
+                                        The IRION Protocol provides a decentralized platform for crypto-collateralized buy-now-pay-later (BNPL) services. Users may interact with the protocol via smart contracts deployed on supported blockchain networks. Access to the protocol is provided on an "as-is" basis, and users are solely responsible for managing their private keys and wallet interactions.
                                     </p>
                                     <p className="mt-4">
                                         Eligibility: By using the platform, you represent that you are of legal age and are not subject to any international sanctions or restricted party lists. You agree to comply with all local regulations regarding cryptocurrency asset management and decentralized finance.
@@ -49,10 +49,10 @@ export default function TermsPage() {
                                         <span>{`>>`}</span> 02_COLLATERAL_LIQUIDATION_RISKS
                                     </h3>
                                     <p>
-                                        Cryptocurrency markets are highly volatile. The XORR Protocol requires collateralization for all credit extensions. In the event that the value of your collateral falls below the predefined 'Health Factor' threshold, the protocol will automatically trigger a liquidation event.
+                                        Cryptocurrency markets are highly volatile. The IRION Protocol requires collateralization for all credit extensions. In the event that the value of your collateral falls below the predefined 'Health Factor' threshold, the protocol will automatically trigger a liquidation event.
                                     </p>
                                     <p className="mt-4">
-                                        Liquidation Mechanism: Liquidation is handled by decentralized bots and smart contract logic. XORR DAO is not responsible for losses incurred during market fluctuations or automated liquidation processes. Users are encouraged to maintain a safe buffer above the minimum liquidation threshold.
+                                        Liquidation Mechanism: Liquidation is handled by decentralized bots and smart contract logic. IRION DAO is not responsible for losses incurred during market fluctuations or automated liquidation processes. Users are encouraged to maintain a safe buffer above the minimum liquidation threshold.
                                     </p>
                                 </div>
 
@@ -61,10 +61,10 @@ export default function TermsPage() {
                                         <span>{`>>`}</span> 03_SMART_CONTRACT_DISCLAIMER
                                     </h3>
                                     <p>
-                                        While XORR Protocol code has undergone multiple third-party audits, the nature of blockchain technology involves inherent risks. Smart contracts may contain vulnerabilities that could lead to the loss of funds.
+                                        While IRION Protocol code has undergone multiple third-party audits, the nature of blockchain technology involves inherent risks. Smart contracts may contain vulnerabilities that could lead to the loss of funds.
                                     </p>
                                     <p className="mt-4">
-                                        By interacting with the XORR smart contracts, you acknowledge and accept the risk of potential bugs, exploits, or network congestion that may affect the execution of transactions or the security of your deposited assets.
+                                        By interacting with the IRION smart contracts, you acknowledge and accept the risk of potential bugs, exploits, or network congestion that may affect the execution of transactions or the security of your deposited assets.
                                     </p>
                                 </div>
 
@@ -73,7 +73,7 @@ export default function TermsPage() {
                                         <span>{`>>`}</span> 04_GOVERNANCE_AND_UPDATES
                                     </h3>
                                     <p>
-                                        XORR is governed by the $XORR holders. The terms of this agreement may be modified via on-chain governance proposals. Continued use of the platform following any modifications constitutes acceptance of the updated framework.
+                                        IRION is governed by the $IRION holders. The terms of this agreement may be modified via on-chain governance proposals. Continued use of the platform following any modifications constitutes acceptance of the updated framework.
                                     </p>
                                 </div>
                             </div>

@@ -4,58 +4,62 @@ import { useState } from "react"
 import { Info, Loader2, AlertTriangle, ShieldCheck } from "lucide-react"
 import { TokenIcon } from "@/components/token-icon"
 import { cn } from "@/lib/utils"
-import { useCurrentAccount } from "@mysten/dapp-kit"
-import { Transaction } from "@mysten/sui/transactions"
-import { isValidSuiAddress } from "@mysten/sui/utils"
-import { useTx } from "@/lib/use-tx"
-import {
-  USDT_PACKAGE_ID,
-  USDT_FAUCET_ID,
-  USDT_DECIMALS,
-  FAUCET_MAX_USDT,
-  SUI_NETWORK,
-} from "@/lib/sui"
+import { toast } from "sonner"
+import { useStellarWallet } from "@/lib/stellar-wallet"
+import { USDC_DECIMALS, NETWORK, explorerTx, StrKey } from "@/lib/stellar"
 
-const CONFIGURED = USDT_PACKAGE_ID !== "" && USDT_FAUCET_ID !== ""
+const FAUCET_MAX_USDC = 10_000
+
+const isValidStellarAddress = (addr: string) => {
+  try { return StrKey.isValidEd25519PublicKey(addr) } catch { return false }
+}
 
 export default function FaucetPage() {
-  const account = useCurrentAccount()
-  const runTx = useTx()
+  const { address, connected } = useStellarWallet()
 
   const [amount, setAmount] = useState("")
   const [recipient, setRecipient] = useState("")
   const [busy, setBusy] = useState(false)
 
-  const effectiveRecipient = (recipient.trim() || account?.address) ?? ""
+  const effectiveRecipient = (recipient.trim() || address) ?? ""
   const parsed = parseFloat(amount)
-  const isOverMax = !isNaN(parsed) && parsed > FAUCET_MAX_USDT
+  const isOverMax = !isNaN(parsed) && parsed > FAUCET_MAX_USDC
   const isValidAmount = !isNaN(parsed) && parsed > 0 && !isOverMax
-  const isValidRecipient = effectiveRecipient !== "" && isValidSuiAddress(effectiveRecipient)
-  const canSubmit = isValidAmount && isValidRecipient && !!account && CONFIGURED && !busy
+  const isValidRecipient = effectiveRecipient !== "" && isValidStellarAddress(effectiveRecipient)
+  const canSubmit = isValidAmount && isValidRecipient && connected && !busy
 
   const handleDispense = async () => {
     if (!canSubmit) return
     setBusy(true)
+    const toastId = toast.loading(`Minting ${parsed} USDC…`)
     try {
-      const raw = BigInt(Math.floor(parsed * 10 ** USDT_DECIMALS))
-      const tx = new Transaction()
-      // usdc::faucet_mint(faucet, amount) -> Coin<USDC>, then send to recipient.
-      const [coin] = tx.moveCall({
-        target: `${USDT_PACKAGE_ID}::usdc::faucet_mint`,
-        arguments: [tx.object(USDT_FAUCET_ID), tx.pure.u64(raw)],
+      const res = await fetch("/api/faucet", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ to: effectiveRecipient, amount: parsed }),
       })
-      tx.transferObjects([coin], tx.pure.address(effectiveRecipient))
-      await runTx(`Mint ${parsed} USDC`, tx) // clickable Suiscan toast
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(data.error || "Faucet failed", { id: toastId, description: data.instructions })
+        return
+      }
+      toast.dismiss(toastId)
+      const url = data.hash ? explorerTx(data.hash) : null
+      toast.success(`Minted ${parsed} USDC`, {
+        description: url ? "View on Stellar.expert ↗" : undefined,
+        action: url ? { label: "View", onClick: () => window.open(url, "_blank", "noopener,noreferrer") } : undefined,
+      })
       setAmount("")
-    } catch { /* toast already shown */ }
-    finally { setBusy(false) }
+    } catch (e) {
+      toast.error("Faucet request failed", { id: toastId, description: e instanceof Error ? e.message : String(e) })
+    } finally { setBusy(false) }
   }
   const status = busy ? "loading" : "idle"
 
   return (
     <div className="flex-1 flex flex-col py-8 gap-8 w-full font-mono text-white">
       <div className="flex flex-col gap-2">
-        <span className="font-mono text-[10px] tracking-[0.4em] text-primary/60 uppercase animate-pulse">XORR_Faucet // sui_{SUI_NETWORK}</span>
+        <span className="font-mono text-[10px] tracking-[0.4em] text-primary/60 uppercase">IRION_Faucet // stellar_{NETWORK}</span>
         <h1 className="text-white text-3xl md:text-5xl tracking-tighter font-black uppercase">Testnet_Resources</h1>
       </div>
 
@@ -65,23 +69,14 @@ export default function FaucetPage() {
             <div className="space-y-1">
               <h3 className="text-xl font-black uppercase tracking-widest text-white">Mint_Test_USDC</h3>
               <p className="text-[10px] font-black uppercase tracking-widest text-foreground/30">
-                Sui_Move_Faucet // Gas_In_SUI
+                Stellar_SAC_Faucet // Server_Signed
               </p>
             </div>
 
-            {!CONFIGURED && (
-              <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3">
-                <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
-                <span className="text-[10px] font-bold uppercase tracking-tight text-amber-400/90">
-                  Faucet not configured. Publish xorr-contracts, then set NEXT_PUBLIC_USDT_PACKAGE_ID and NEXT_PUBLIC_USDT_FAUCET_ID in .env.local
-                </span>
-              </div>
-            )}
-
-            {!account && (
+            {!connected && (
               <div className="flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
                 <Info size={14} className="text-primary/40 flex-shrink-0" />
-                <span className="text-[10px] font-black uppercase tracking-tighter text-primary/40">Connect_your_Sui_wallet_to_mint</span>
+                <span className="text-[10px] font-black uppercase tracking-tighter text-primary/40">Connect_your_Stellar_wallet_to_mint</span>
               </div>
             )}
 
@@ -89,9 +84,9 @@ export default function FaucetPage() {
             <div className="bg-[#05080f]/60 border border-border/20 rounded-2xl p-5 space-y-2 group focus-within:border-primary/40 transition-all">
               <label className="text-[10px] font-black uppercase tracking-widest text-foreground/40">Recipient_Address (defaults to you)</label>
               <input type="text" value={recipient} onChange={e => setRecipient(e.target.value.trim())}
-                placeholder={account?.address ?? "0x... sui address"}
+                placeholder={address ?? "G... stellar address"}
                 className={`w-full bg-transparent text-sm font-mono placeholder:text-foreground/20 focus:outline-none ${effectiveRecipient && !isValidRecipient ? "text-red-400" : "text-foreground/70"}`} />
-              {effectiveRecipient !== "" && !isValidRecipient && <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest">INVALID_SUI_ADDRESS</p>}
+              {effectiveRecipient !== "" && !isValidRecipient && <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest">INVALID_STELLAR_ADDRESS</p>}
             </div>
 
             {/* Amount */}
@@ -108,15 +103,15 @@ export default function FaucetPage() {
               </div>
               <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
                 <span className="text-foreground/30">Max_Per_Request</span>
-                <button type="button" onClick={() => setAmount(FAUCET_MAX_USDT.toString())}
+                <button type="button" onClick={() => setAmount(FAUCET_MAX_USDC.toString())}
                   className="text-primary/70 hover:text-primary font-black transition-colors">
-                  {FAUCET_MAX_USDT.toLocaleString()} USDC
+                  {FAUCET_MAX_USDC.toLocaleString()} USDC
                 </button>
               </div>
               {isOverMax && (
                 <div className="flex items-center gap-2 text-red-400 text-[11px]">
                   <AlertTriangle size={12} />
-                  Max is {FAUCET_MAX_USDT.toLocaleString()} USDC per request
+                  Max is {FAUCET_MAX_USDC.toLocaleString()} USDC per request
                 </div>
               )}
             </div>
@@ -144,10 +139,9 @@ export default function FaucetPage() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">How_It_Works</span>
             </div>
             <div className="space-y-2 text-[11px] text-foreground/40 leading-relaxed font-mono">
-              <p className="text-foreground/60">Calls usdc::faucet_mint on the shared Faucet object.</p>
-              <p>The mint transaction is signed by your connected Sui wallet (gas paid in SUI).</p>
-              <p className="mt-3">Network: <span className="text-primary/60">Sui {SUI_NETWORK}</span></p>
-              <p>Status: <span className="text-primary/60">{CONFIGURED ? "LIVE" : "AWAITING_CONFIG"}</span></p>
+              <p className="text-foreground/60">Mints test USDC via the contract admin, server-side.</p>
+              <p>No wallet signature needed — the faucet route signs with the deployer key (FAUCET_SECRET).</p>
+              <p className="mt-3">Network: <span className="text-primary/60">Stellar {NETWORK}</span></p>
             </div>
           </div>
 
@@ -160,11 +154,11 @@ export default function FaucetPage() {
               </div>
               <div className="flex justify-between border-b border-primary/10 pb-2">
                 <span className="text-foreground/40">Decimals</span>
-                <span className="text-foreground/60">{USDT_DECIMALS}</span>
+                <span className="text-foreground/60">{USDC_DECIMALS}</span>
               </div>
               <div className="flex justify-between border-b border-primary/10 pb-2 last:border-0">
                 <span className="text-foreground/40">Max per request</span>
-                <span className="text-primary font-bold">{FAUCET_MAX_USDT.toLocaleString()} USDC</span>
+                <span className="text-primary font-bold">{FAUCET_MAX_USDC.toLocaleString()} USDC</span>
               </div>
             </div>
           </div>

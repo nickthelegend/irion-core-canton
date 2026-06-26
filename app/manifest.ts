@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "XORR Finance",
-    short_name: "XORR",
-    description: "Private consumer credit on Sui — BNPL, lend/borrow, and a confidential TEE credit score.",
+    name: "IRION Finance",
+    short_name: "IRION",
+    description: "Private consumer credit on Stellar — BNPL, lend/borrow, and a zero-knowledge credit score.",
     start_url: "/",
     display: "standalone",
     background_color: "#05080f",

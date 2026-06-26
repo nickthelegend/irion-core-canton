@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/pay/", "/positions", "/transactions"],
       },
     ],
-    sitemap: "https://app.xorr.finance/sitemap.xml",
-    host: "https://app.xorr.finance",
+    sitemap: "https://app.irion.finance/sitemap.xml",
+    host: "https://app.irion.finance",
   };
 }

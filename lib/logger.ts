@@ -1,6 +1,6 @@
 /**
- * POLARIS PROTOCOL — STRUCTURED LOGGER
- * Standardizes [POLARIS] prefix and log levels across the application.
+ * IRION PROTOCOL — STRUCTURED LOGGER
+ * Standardizes [IRION] prefix and log levels across the application.
  */
 
 type LogLevel = "INFO" | "WARN" | "ERROR" | "FHE" | "DEBUG";
@@ -15,9 +15,9 @@ interface LogMetadata {
   [key: string]: any;
 }
 
-class PolarisLogger {
+class IrionLogger {
   private format(level: LogLevel, module: string, message: string): string {
-    return `[POLARIS][${level}][${module.toUpperCase()}] ${message}`;
+    return `[IRION][${level}][${module.toUpperCase()}] ${message}`;
   }
 
   info(module: string, message: string, metadata?: LogMetadata) {
@@ -63,4 +63,4 @@ class PolarisLogger {
   }
 }
 
-export const logger = new PolarisLogger();
+export const logger = new IrionLogger();

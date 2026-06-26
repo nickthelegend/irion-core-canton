@@ -1,12 +1,12 @@
 "use client"
 
-// MIGRATED wagmi → Sui.
-import { usePolarisWallet } from "@/lib/hooks/usePolarisWallet"
+// MIGRATED Sui → Stellar.
+import { useStellarWallet } from "@/lib/stellar-wallet"
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button"
 import Link from "next/link"
 
 export function LandingPage() {
-    const { connected: authenticated } = usePolarisWallet()
+    const { connected: authenticated } = useStellarWallet()
 
 
     return (
@@ -21,7 +21,7 @@ export function LandingPage() {
                             <path d="M 500, 500 m -400, 0 a 400,400 0 1,1 800,0 a 400,400 0 1,1 -800,0" fill="transparent" id="circlePath"></path>
                             <text className="text-ring">
                                 <textPath xlinkHref="#circlePath">
-                                    PRIVACY_IS_POWER • XORR_PROTOCOL • PRIVATE_CREDIT_ON_SUI •
+                                    PRIVACY_IS_POWER • IRION_PROTOCOL • PRIVATE_CREDIT_ON_STELLAR •
                                 </textPath>
                             </text>
                         </svg>
@@ -49,13 +49,13 @@ export function LandingPage() {
                             <p className="text-[10px] font-mono tracking-[0.4em] text-primary uppercase">Protocol_Heartbeat_v1.0</p>
                         </div>
                         <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-4 italic uppercase font-display text-white">
-                            XORR PROTOCOL
+                            IRION PROTOCOL
                         </h1>
                         <p className="text-slate-200 font-mono text-lg tracking-widest uppercase max-w-3xl mx-auto mb-4">
-                            Buy Now Pay Never & Lend/Borrow on Sui.
+                            Buy Now Pay Never & Lend/Borrow on Stellar.
                         </p>
                         <p className="text-slate-400 font-mono text-sm tracking-widest uppercase max-w-2xl mx-auto">
-                            Powered by private TEE credit. Borrow against your reputation, not just collateral.
+                            Powered by private zero-knowledge credit. Borrow against your reputation, not just collateral.
                         </p>
                     </div>
 
@@ -123,13 +123,13 @@ export function LandingPage() {
                 <div className="marquee-container">
                     <div className="marquee-content flex gap-20 items-center">
                         <div className="flex gap-8 items-center">
-                            <span className="text-primary font-mono text-base font-bold tracking-[0.3em] uppercase">XORR NETWORK STATUS:</span>
+                            <span className="text-primary font-mono text-base font-bold tracking-[0.3em] uppercase">IRION NETWORK STATUS:</span>
                             <span className="text-white/60 font-mono text-sm uppercase tracking-tighter whitespace-nowrap">LOCKED_VALUE: $450,120</span>
                             <span className="text-white/60 font-mono text-sm uppercase tracking-tighter whitespace-nowrap">FHE_OPS_SEC: 1,240</span>
                             <span className="text-white/60 font-mono text-sm uppercase tracking-tighter whitespace-nowrap">TOTAL_LENT: $2,450,192.00</span>
                             <span className="text-white/60 font-mono text-sm uppercase tracking-tighter whitespace-nowrap">ACTIVE_VAULTS: 12,402</span>
                             <span className="text-white/60 font-mono text-sm uppercase tracking-tighter whitespace-nowrap">ZK_SYNC_HEALTH: 100%</span>
-                            <span className="text-primary font-mono text-base font-bold tracking-[0.3em] uppercase ml-20">XORR NETWORK STATUS:</span>
+                            <span className="text-primary font-mono text-base font-bold tracking-[0.3em] uppercase ml-20">IRION NETWORK STATUS:</span>
                             <span className="text-white/60 font-mono text-sm uppercase tracking-tighter whitespace-nowrap">LOCKED_POL: 4,200,540</span>
                         </div>
                     </div>

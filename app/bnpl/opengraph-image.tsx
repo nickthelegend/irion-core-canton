@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "XORR Finance — Buy Now, Pay Never";
+export const alt = "IRION Finance — Buy Now, Pay Never";
 export const size = {
   width: 1200,
   height: 630,
@@ -41,7 +41,7 @@ export default async function Image() {
             letterSpacing: "4px",
           }}
         >
-          <span>XORR // BNPL_MODULE</span>
+          <span>IRION // BNPL_MODULE</span>
           <span>STATUS: ACTIVE</span>
         </div>
 
@@ -87,7 +87,7 @@ export default async function Image() {
               textAlign: "center",
             }}
           >
-            Lock collateral to earn yield that auto-repays your loan on the Sui blockchain.
+            Lock collateral to earn yield that auto-repays your loan on the Stellar blockchain.
           </div>
         </div>
 
@@ -105,8 +105,8 @@ export default async function Image() {
             fontSize: "16px",
           }}
         >
-          <span>XORR FINANCE</span>
-          <span>APP.XORR.FINANCE/BNPL</span>
+          <span>IRION FINANCE</span>
+          <span>APP.IRION.FINANCE/BNPL</span>
         </div>
       </div>
     ),

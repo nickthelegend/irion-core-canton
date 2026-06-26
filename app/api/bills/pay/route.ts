@@ -1,19 +1,15 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
+import { rpc } from "@/lib/stellar";
 
 const MERCHANT_APP_URL = process.env.MERCHANT_APP_URL || "http://localhost:3002";
-const FULLNODE = process.env.SUI_RPC_URL || "https://fullnode.testnet.sui.io:443";
 
-// Verify the referenced tx actually settled on-chain before marking a bill paid.
-async function txSucceeded(digest: string): Promise<boolean> {
+// Verify the referenced tx actually settled on Stellar before marking a bill
+// paid. Uses Soroban RPC getTransaction — only a SUCCESS status counts.
+async function txSucceeded(hash: string): Promise<boolean> {
   try {
-    const r = await fetch(FULLNODE, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "sui_getTransactionBlock", params: [digest, { showEffects: true }] }),
-    });
-    const j = await r.json();
-    return j?.result?.effects?.status?.status === "success";
+    const got = await rpc.getTransaction(hash);
+    return got.status === "SUCCESS";
   } catch {
     return false;
   }

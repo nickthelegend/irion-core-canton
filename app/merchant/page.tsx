@@ -3,17 +3,17 @@
 import Link from "next/link"
 import { Store, ShieldCheck, CreditCard, ArrowUpRight } from "lucide-react"
 import { ConnectGate } from "@/components/connect-gate"
-import { useCurrentAccount } from "@mysten/dapp-kit"
-import { SUI_NETWORK } from "@/lib/sui"
+import { useStellarWallet } from "@/lib/stellar-wallet"
+import { NETWORK } from "@/lib/stellar"
 
 export default function MerchantPage() {
-  const account = useCurrentAccount()
+  const { address } = useStellarWallet()
 
   return (
     <ConnectGate>
       <div className="flex-1 flex flex-col py-8 gap-8 w-full font-mono text-white">
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] tracking-[0.4em] text-primary/60 uppercase">XORR // Merchant · sui_{SUI_NETWORK}</span>
+          <span className="font-mono text-[10px] tracking-[0.4em] text-primary/60 uppercase">IRION // Merchant · stellar_{NETWORK}</span>
           <h1 className="text-white text-3xl tracking-tighter font-black uppercase italic">Merchant Hub</h1>
         </div>
 
@@ -22,17 +22,17 @@ export default function MerchantPage() {
             <Store className="size-7 text-primary" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-black uppercase tracking-tighter">Accept BNPL on Sui</h2>
+            <h2 className="text-xl font-black uppercase tracking-tighter">Accept BNPL on Stellar</h2>
             <p className="text-sm text-foreground/50 leading-relaxed max-w-md">
-              Customers settle bills in USDC directly to your Sui address. Payments confirm on-chain and are
-              auditable on Suiscan — no custodial escrow, no EVM bridge.
+              Customers settle bills in USDC directly to your Stellar address. Payments confirm on-chain and are
+              auditable on Stellar.expert — no custodial escrow, no EVM bridge.
             </p>
           </div>
 
-          {account && (
+          {address && (
             <div className="w-full bg-[#05080f]/60 border border-border/20 rounded-2xl p-4 flex items-center justify-between">
-              <span className="text-[10px] text-foreground/40 uppercase tracking-widest">Your_Sui_Address</span>
-              <span className="text-[11px] text-white font-bold truncate ml-3">{account.address.slice(0, 10)}…{account.address.slice(-8)}</span>
+              <span className="text-[10px] text-foreground/40 uppercase tracking-widest">Your_Stellar_Address</span>
+              <span className="text-[11px] text-white font-bold truncate ml-3">{address.slice(0, 10)}…{address.slice(-8)}</span>
             </div>
           )}
 
@@ -50,8 +50,8 @@ export default function MerchantPage() {
           <ShieldCheck className="text-primary flex-shrink-0" size={20} />
           <p className="text-[11px] text-foreground/50 leading-relaxed">
             Bill links open the checkout at <span className="text-primary">/pay/&lt;hash&gt;</span>, where the customer
-            pays you in USDC on Sui {SUI_NETWORK}. Configure your settlement address per bill or via
-            NEXT_PUBLIC_XORR_MERCHANT_ADDRESS.
+            pays you in USDC on Stellar {NETWORK}. Configure your settlement address per bill or via
+            NEXT_PUBLIC_IRION_MERCHANT_ADDRESS.
           </p>
         </div>
       </div>

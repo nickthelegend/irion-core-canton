@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import { Db } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-
-export async function getPoolBySymbol(db: Db, symbol: string) {
-  return db.collection("pools").findOne({ symbol: symbol.toUpperCase() });
-}
+import { getPoolBySymbol } from "@/lib/db-queries";
 
 export async function GET(
   _req: Request,

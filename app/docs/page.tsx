@@ -18,13 +18,13 @@ export default function DocsPage() {
       <aside className="w-72 glass-sidebar flex flex-col custom-scrollbar overflow-y-auto hidden lg:flex bg-[#05080f]/70 border-r border-white/5">
         <div className="p-8">
           <div className="mb-10">
-            <h1 className="text-white text-sm font-black tracking-[0.2em] mb-1">XORR_DOCS</h1>
-            <p className="text-primary/60 text-[9px] font-bold uppercase tracking-[0.3em]">PRIVATE_CREDIT_ON_SUI</p>
+            <h1 className="text-white text-sm font-black tracking-[0.2em] mb-1">IRION_DOCS</h1>
+            <p className="text-primary/60 text-[9px] font-bold uppercase tracking-[0.3em]">PRIVATE_CREDIT_ON_STELLAR</p>
           </div>
           <nav className="space-y-2">
             {[
               { id: "intro", label: "01_INTRODUCTION", icon: FolderOpen },
-              { id: "tee", label: "02_TEE_CREDIT", icon: ShieldCheck },
+              { id: "tee", label: "02_ZK_CREDIT", icon: ShieldCheck },
               { id: "pools", label: "03_LENDING_POOL", icon: Database },
               { id: "borrowing", label: "04_BORROW_LOGIC", icon: Zap },
               { id: "bnpl", label: "05_BNPL", icon: Lock },
@@ -56,12 +56,12 @@ export default function DocsPage() {
 
           <div className="mb-16">
             <h1 className="text-5xl font-black tracking-tighter leading-none mb-8 text-white uppercase italic">
-              XORR_PROTOCOL <span className="text-primary">//</span> <br />
+              IRION_PROTOCOL <span className="text-primary">//</span> <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/30">SPECIFICATION</span>
             </h1>
             <p className="text-white/40 text-sm leading-relaxed max-w-2xl font-medium">
-              XORR is a BNPL and lend/borrow protocol on Sui, with private credit scoring computed inside a Trusted
-              Execution Environment (TEE). Supply liquidity, borrow against collateral, or borrow unsecured against
+              IRION is a BNPL and lend/borrow protocol on Stellar, with private credit scoring proven with a
+              zero-knowledge proof. Supply liquidity, borrow against collateral, or borrow unsecured against
               your reputation — all settled on-chain in Move.
             </p>
           </div>
@@ -70,12 +70,12 @@ export default function DocsPage() {
             <section id="tee" className="space-y-6">
               <div className="flex items-center gap-4">
                 <span className="text-primary font-mono text-sm">[1.0]</span>
-                <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">THE_TEE_ADVANTAGE</h3>
+                <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">THE_ZK_ADVANTAGE</h3>
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
-                A confidential enclave evaluates your repayment history and external footprint, then signs a credit
-                score that is attested to your on-chain CreditProfile. Your raw financial data never leaves the TEE —
-                only the resulting score and limit become visible on Sui.
+                A zero-knowledge proof evaluates your repayment history and external footprint, then signs a credit
+                score that is attested to your on-chain CreditProfile. Your raw financial data never leaves your device —
+                only the resulting score and limit become visible on Stellar.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-3">
@@ -95,8 +95,8 @@ export default function DocsPage() {
                 <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">LENDING_POOL</h3>
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
-                Liquidity providers supply USDC to a shared LendingPool object and receive a SupplyReceipt. Borrowers
-                draw against the pool; interest and routed DeepBook yield accrue back to suppliers.
+                Liquidity providers supply USDC to the shared lending pool and receive shares. Borrowers
+                draw against the pool; interest and harvested Blend yield accrue back to suppliers.
               </p>
 
               {/* Terminal Code Block */}
@@ -107,15 +107,16 @@ export default function DocsPage() {
                     <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
                     <div className="w-3 h-3 rounded-full bg-green-500/50" />
                   </div>
-                  <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Move // lending_pool.move</span>
+                  <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Rust // contracts/core/src/lib.rs</span>
                 </div>
                 <div className="p-8 font-mono text-[11px] leading-relaxed text-white/80">
-                  <div><span className="text-primary font-bold">public fun</span> <span className="text-blue-400 font-bold">supply</span>&lt;T&gt;(pool: <span className="text-primary">&mut</span> LendingPool&lt;T&gt;, coin: Coin&lt;T&gt;): SupplyReceipt {'{'}</div>
-                  <div className="pl-6 text-white/50 italic">// Deposit liquidity, mint a receipt for the supplier</div>
-                  <div className="pl-6"><span className="text-white">let</span> amount = coin::value(&coin);</div>
-                  <div className="pl-6">balance::join(&<span className="text-primary">mut</span> pool.cash, coin::into_balance(coin));</div>
-                  <div className="pl-6">pool.total_supplied = pool.total_supplied + amount;</div>
-                  <div className="pl-6"><span className="text-primary">mint_receipt</span>(pool, amount)</div>
+                  <div><span className="text-primary font-bold">pub fn</span> <span className="text-blue-400 font-bold">supply</span>(env: Env, from: Address, amount: i128) -&gt; i128 {'{'}</div>
+                  <div className="pl-6 text-white/50 italic">// Supply liquidity, mint pro-rata shares to the supplier</div>
+                  <div className="pl-6">from.<span className="text-primary">require_auth</span>();</div>
+                  <div className="pl-6"><span className="text-white">let</span> shares = amount * total_shares / total_assets;</div>
+                  <div className="pl-6">token::Client::new(&env, &usdc).<span className="text-primary">transfer</span>(&from, &this, &amount);</div>
+                  <div className="pl-6"><span className="text-primary">Self</span>::add(&env, Available, amount);</div>
+                  <div className="pl-6">shares</div>
                   <div>{'}'}</div>
                 </div>
               </div>
@@ -128,7 +129,7 @@ export default function DocsPage() {
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
                 Collateralized borrows lock 150% USDC collateral and mint a CollateralizedPosition. Unsecured borrows
-                require no collateral — they are gated by the TEE credit score and the profile&apos;s available credit line.
+                require no collateral — they are gated by the zero-knowledge credit score and the profile&apos;s available credit line.
               </p>
               <div className="p-8 bg-primary/5 border border-primary/20 rounded-2xl">
                  <div className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">COLLATERAL_LOGIC</div>
@@ -164,7 +165,7 @@ export default function DocsPage() {
                 { label: "ARCH_SUMMARY", pct: "100%" },
                 { label: "POOL_SPECS", pct: "100%" },
                 { label: "BORROW_API", pct: "85%" },
-                { label: "TEE_ATTEST", pct: "60%" },
+                { label: "ZK_ATTEST", pct: "60%" },
               ].map(p => (
                 <div key={p.label} className="space-y-3">
                   <div className="flex justify-between text-[9px] font-black text-white/60">
@@ -182,7 +183,7 @@ export default function DocsPage() {
           <div className="p-6 bg-[#1a1c22] border border-white/5 rounded-2xl space-y-4">
              <Terminal className="text-primary size-5" />
              <p className="text-[10px] font-black text-white uppercase tracking-wider">Integration Support</p>
-             <p className="text-[9px] text-white/30 uppercase leading-relaxed">Reach the XORR team for Sui testnet integration support and contract addresses.</p>
+             <p className="text-[9px] text-white/30 uppercase leading-relaxed">Reach the IRION team for Stellar testnet integration support and contract addresses.</p>
           </div>
         </div>
       </aside>

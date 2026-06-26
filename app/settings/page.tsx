@@ -13,7 +13,7 @@ export default function SettingsPage() {
           <Label htmlFor="dark">Dark Mode</Label>
           <Switch id="dark" checked />
         </div>
-        <div className="text-xs text-foreground/70">Theme follows the neon-lime on dark XORR design.</div>
+        <div className="text-xs text-foreground/70">Theme follows the neon-lime on dark IRION design.</div>
       </div>
     </ConnectGate>
   )

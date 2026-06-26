@@ -15,7 +15,7 @@ import {
   LogOut,
   User
 } from "lucide-react"
-import { useObolusWallet } from "@/lib/hooks/useObolusWallet"
+import { useStellarWallet } from "@/lib/stellar-wallet"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
@@ -29,7 +29,7 @@ const NAV_ITEMS = [
 
 export function SidebarDrawer({ open, onOpenChange }: { open?: boolean; onOpenChange?: (v: boolean) => void }) {
   const pathname = usePathname()
-  const { address, connected: authenticated, disconnect: logout } = useObolusWallet()
+  const { address, connected: authenticated, disconnect: logout } = useStellarWallet()
 
   const shortAddress = (a: string) => a.length > 10 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a
 
@@ -45,7 +45,7 @@ export function SidebarDrawer({ open, onOpenChange }: { open?: boolean; onOpenCh
         <SheetHeader className="p-6 pb-2">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <div className="flex items-center gap-2">
-            <span className="text-xl font-black tracking-tighter text-primary italic">XORR//</span>
+            <span className="text-xl font-black tracking-tighter text-primary italic">IRION//</span>
           </div>
         </SheetHeader>
 

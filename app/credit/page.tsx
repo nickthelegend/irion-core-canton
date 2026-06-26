@@ -5,118 +5,100 @@ import Link from "next/link"
 import {
   ShieldCheck, Lock, Loader2, Wallet, CreditCard, TrendingUp, RefreshCw, ArrowUpRight,
 } from "lucide-react"
-import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit"
 import { toast } from "sonner"
-import { readCreditProfile, openProfileTx, applyTeeScoreTx, readLoan, repayTx, USDT_COIN_TYPE, type CreditProfileView, type LoanView } from "@/lib/bnpl"
-import { repayUncollateralizedTx } from "@/lib/market"
-import { SUI_NETWORK } from "@/lib/sui"
-import { useTx, findCreated } from "@/lib/use-tx"
+import { useStellarWallet } from "@/lib/stellar-wallet"
+import { irion, type Profile, type Loan } from "@/lib/irion"
+import { generateCreditProof } from "@/lib/prover"
+import { NETWORK, fromUnits, explorerTx } from "@/lib/stellar"
 
-const LS_PROFILE = "xorr_bnpl_profile"
-const LS_LOANS = "xorr_bnpl_loans"
+const LS_LOANS = "irion_bnpl_loans"
 const MIN_SCORE = 600
 
-type CreditLine = { id: string; kind: string; view: LoanView }
+type CreditLine = { id: string; view: Loan }
 
 export default function CreditPage() {
-  const account = useCurrentAccount()
-  const client = useSuiClient()
-  const runTx = useTx()
+  const { address, connected, sign } = useStellarWallet()
 
-  const [profile, setProfile] = useState<CreditProfileView | null>(null)
-  const [profileId, setProfileId] = useState<string | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [lines, setLines] = useState<CreditLine[]>([])
-  const [primaryCoin, setPrimaryCoin] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [working, setWorking] = useState(false)
   const [repaying, setRepaying] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
-    if (!account) return
+    if (!address) return
     setLoading(true)
     try {
-      const id = typeof window !== "undefined" ? localStorage.getItem(LS_PROFILE) : null
-      setProfileId(id)
-      const [prof, coins] = await Promise.all([
-        id ? readCreditProfile(client, id).catch(() => null) : Promise.resolve(null),
-        client.getCoins({ owner: account.address, coinType: USDT_COIN_TYPE }).catch(() => ({ data: [] })),
-      ])
+      const prof = await irion.getProfile(address).catch(() => null)
       setProfile(prof)
-      let best: string | null = null, bestBal = BigInt(0)
-      for (const c of coins.data) { const b = BigInt(c.balance); if (b > bestBal) { bestBal = b; best = c.coinObjectId } }
-      setPrimaryCoin(best)
-      // BNPL loans are SHARED objects — read by the ids we tracked at checkout.
-      const stored: { id: string; kind?: string }[] = JSON.parse(localStorage.getItem(LS_LOANS) || "[]")
+      // Loans are tracked by id at checkout, then read on-chain by id.
+      const stored: { id: string }[] = JSON.parse(localStorage.getItem(LS_LOANS) || "[]")
       const views = await Promise.all(stored.map(async (l) => {
-        const v = await readLoan(client, l.id).catch(() => null)
-        return v ? { id: l.id, kind: l.kind || "bnpl", view: v } : null
+        const v = await irion.getLoan(BigInt(l.id)).catch(() => null)
+        return v ? { id: l.id, view: v } : null
       }))
-      setLines(views.filter((c): c is CreditLine => !!c && c.view.status === 0 && c.view.outstanding > 0))
+      setLines(views.filter((c): c is CreditLine => !!c && c.view.status === 0 && fromUnits(c.view.outstanding) > 0))
     } finally {
       setLoading(false)
     }
-  }, [account, client])
+  }, [address])
 
   useEffect(() => { refresh() }, [refresh])
 
   const onRepay = async (line: CreditLine) => {
-    if (!account || !profileId || !primaryCoin) return
-    const amt = line.view.outstanding
+    if (!address) return
+    const amt = fromUnits(line.view.outstanding)
     setRepaying(line.id)
     try {
-      const tx = line.kind === "unsecured"
-        ? repayUncollateralizedTx(line.id, profileId, primaryCoin, amt, account.address)
-        : repayTx({ loanId: line.id, profileId, primaryCoinId: primaryCoin, amountUsdt: amt, sender: account.address })
-      await runTx(`Repay ${amt} USDC`, tx)
+      await irion.repay(address, BigInt(line.id), amt, sign)
+      toast.success(`Repaid ${amt} USDC`)
       await refresh()
-    } catch { /* toast shown */ } finally { setRepaying(null) }
+    } catch (e) { toast.error("Repay failed", { description: e instanceof Error ? e.message : String(e) }) } finally { setRepaying(null) }
   }
 
-  // Open (share) a CreditProfile for the connected wallet, then remember its id.
+  // Open a CreditProfile for the connected wallet.
   const openProfile = async () => {
+    if (!address) return
     setWorking(true)
     try {
-      const res = await runTx("Open credit profile", openProfileTx())
-      const id = findCreated(res, "::credit::CreditProfile")
-      if (id) { localStorage.setItem(LS_PROFILE, id); setProfileId(id); await refresh() }
-    } catch { /* toast shown by runTx */ } finally { setWorking(false) }
+      await irion.openProfile(address, sign)
+      toast.success("Credit profile opened")
+      await refresh()
+    } catch (e) { toast.error("Open profile failed", { description: e instanceof Error ? e.message : String(e) }) } finally { setWorking(false) }
   }
 
-  // Ask the credit enclave to sign a score, then verify+apply it on-chain.
-  const requestTeeScore = async () => {
-    if (!profileId || !account) return
+  // Generate the credit proof IN THE BROWSER (snarkjs), then verify + apply it
+  // on-chain. The borrower's financials never leave the device.
+  const requestZkScore = async () => {
+    if (!address) return
     setWorking(true)
     try {
-      const r = await fetch("/api/credit-score", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ borrower: account.address, profileId }),
-      })
-      const data = await r.json()
-      if (!r.ok || data.error) { toast.error(data.error || "Enclave request failed"); return }
-      await runTx("TEE score — verified vs attested enclave key ✓", applyTeeScoreTx({
-        profileId,
-        score: data.score,
-        approvedLimit: data.approvedLimit,
-        nonce: data.nonce,
-        timestampMs: data.timestampMs,
-        signatureHex: data.signatureHex,
-      }))
-      toast.success("Score attested by the audited TEE enclave", {
-        description: "Verified on-chain against the AWS Nitro–attestation-bound key (PCR-gated). Your financial data never left the enclave.",
+      // Demo figures — wire a form here to collect the borrower's real private numbers.
+      const inputs = {
+        monthlyIncome: 6000, monthlyDebt: 800, onTimePayments: 36,
+        missedPayments: 1, utilizationBps: 2200, creditAgeMonths: 60,
+      }
+      const nonce = Number(profile?.nonce ?? BigInt(0)) + 1
+      toast.info("Generating a zero-knowledge proof in your browser…")
+      const { proof, pubSignals, approvedLimit } = await generateCreditProof(inputs, address, nonce)
+      const { hash } = await irion.applyZkScore(address, proof, pubSignals, sign)
+      toast.success(`Score verified on-chain — limit raised to ${approvedLimit} USDC`, {
+        description:
+          "Proven with a Groth16 proof generated on your device and checked by the BN254 verifier. Your financial data never left your browser.",
+        action: { label: "View", onClick: () => window.open(explorerTx(hash), "_blank", "noopener,noreferrer") },
       })
       await refresh()
-    } catch { /* toast shown by runTx */ } finally { setWorking(false) }
+    } catch (e) { toast.error("ZK score failed", { description: e instanceof Error ? e.message : String(e) }) } finally { setWorking(false) }
   }
 
-  if (!account) {
+  if (!connected || !address) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-20 gap-6 font-mono">
         <div className="glass-card rounded-lg border border-primary/20 p-10 flex flex-col items-center gap-6 shadow-[0_0_30px_rgba(166,242,74,0.08)]">
           <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center border border-primary/30"><Wallet className="size-7 text-primary" /></div>
           <div className="text-center">
             <h1 className="text-xl font-black uppercase tracking-tighter text-white mb-2">Connect_Wallet</h1>
-            <p className="text-[10px] text-white/40 uppercase tracking-[0.15em] max-w-[240px] leading-relaxed">Connect your Sui wallet to view your XORR credit profile.</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-[0.15em] max-w-[240px] leading-relaxed">Connect your Stellar wallet to view your Irion credit profile.</p>
           </div>
         </div>
       </div>
@@ -125,12 +107,16 @@ export default function CreditPage() {
 
   const score = profile?.score ?? 0
   const scorePct = Math.min(100, (score / 850) * 100)
+  const creditLimit = profile ? fromUnits(profile.credit_limit) : 0
+  const outstanding = profile ? fromUnits(profile.outstanding) : 0
+  const repaidTotal = profile ? fromUnits(profile.repaid_total) : 0
+  const available = Math.max(0, creditLimit - outstanding)
 
   return (
     <div className="flex-1 flex flex-col py-8 gap-8 w-full font-mono text-white">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] tracking-[0.4em] text-primary/60 uppercase">XORR // Private_Credit · sui_{SUI_NETWORK}</span>
+          <span className="text-[10px] tracking-[0.4em] text-primary/60 uppercase">IRION // Private_Credit · stellar_{NETWORK}</span>
           <h1 className="text-3xl tracking-tighter font-black uppercase">Credit Dashboard</h1>
         </div>
         <button onClick={refresh} disabled={loading}
@@ -142,10 +128,10 @@ export default function CreditPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          ["Credit_Limit", profile ? `${profile.creditLimit} USDC` : "—"],
-          ["Available", profile ? `${profile.available} USDC` : "—"],
-          ["Outstanding", profile ? `${profile.outstanding} USDC` : "—"],
-          ["Repaid_Total", profile ? `${profile.repaidTotal} USDC` : "—"],
+          ["Credit_Limit", profile ? `${creditLimit} USDC` : "—"],
+          ["Available", profile ? `${available} USDC` : "—"],
+          ["Outstanding", profile ? `${outstanding} USDC` : "—"],
+          ["Repaid_Total", profile ? `${repaidTotal} USDC` : "—"],
         ].map(([l, v]) => (
           <div key={l} className="bg-[#05080f]/60 border border-border/20 rounded-2xl p-5 flex flex-col gap-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-foreground/40">{l}</span>
@@ -154,17 +140,17 @@ export default function CreditPage() {
         ))}
       </div>
 
-      {/* TEE score */}
+      {/* ZK score */}
       <div className="glass-card rounded-lg border border-purple-500/20 overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.05)]">
         <div className="bg-purple-500/5 px-5 py-2.5 border-b border-purple-500/10 flex justify-between items-center">
-          <div className="flex items-center gap-2"><Lock className="size-3.5 text-purple-400" /><span className="text-[10px] text-purple-400/80 uppercase tracking-widest font-bold">Private_TEE_Credit_Score</span></div>
+          <div className="flex items-center gap-2"><Lock className="size-3.5 text-purple-400" /><span className="text-[10px] text-purple-400/80 uppercase tracking-widest font-bold">Zero_Knowledge_Credit_Score</span></div>
           <span className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-green-400 bg-green-500/10 border border-green-500/30 rounded-full px-2 py-1">
-            <ShieldCheck className="size-3" /> Enclave Attested · On-chain PCR
+            <ShieldCheck className="size-3" /> Groth16 Verified · On-chain
           </span>
         </div>
         <div className="p-6 space-y-5">
           <p className="text-[10px] text-white/40 leading-relaxed max-w-2xl">
-            Your XORR credit score is computed inside a confidential TEE and attested on-chain to your
+            Your Irion credit score is proven with a zero-knowledge proof and verified on-chain against your
             <span className="text-purple-400 font-bold"> CreditProfile</span>. A score of at least {MIN_SCORE} unlocks
             unsecured (collateral-free) borrowing in the money market.
           </p>
@@ -183,27 +169,21 @@ export default function CreditPage() {
               <span className={`text-[10px] uppercase font-bold ${score >= MIN_SCORE ? "text-green-400" : "text-amber-400"}`}>
                 {score >= MIN_SCORE ? "Unsecured borrowing unlocked" : `Needs ≥ ${MIN_SCORE} for unsecured`}
               </span>
-              <button onClick={requestTeeScore} disabled={working}
+              <button onClick={requestZkScore} disabled={working}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-200 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500/30 disabled:opacity-40 transition-all">
                 {working ? <Loader2 className="size-3 animate-spin" /> : <Lock className="size-3" />}
-                {working ? "Signing in enclave…" : score > 0 ? "Refresh TEE Score" : "Request TEE Score"}
+                {working ? "Proving…" : score > 0 ? "Refresh ZK Score" : "Request ZK Score"}
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-3 flex-wrap">
-              <p className="text-[11px] text-amber-400/80">No credit profile yet — open one to start building your TEE-attested score.</p>
+              <p className="text-[11px] text-amber-400/80">No credit profile yet — open one to start building your ZK-verified score.</p>
               <button onClick={openProfile} disabled={working}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-200 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500/30 disabled:opacity-40 transition-all">
                 {working ? <Loader2 className="size-3 animate-spin" /> : <ShieldCheck className="size-3" />}
                 {working ? "Opening…" : "Open Credit Profile"}
               </button>
             </div>
-          )}
-          {profileId && (
-            <a href={`https://suiscan.xyz/${SUI_NETWORK}/object/${profileId}`} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[9px] text-purple-400/50 hover:text-purple-400 font-mono pt-1">
-              CreditProfile object <ArrowUpRight size={10} />
-            </a>
           )}
         </div>
       </div>
@@ -221,16 +201,15 @@ export default function CreditPage() {
             {lines.map((l) => (
               <div key={l.id} className="px-5 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
                 <div className="flex items-center gap-3">
-                  {l.kind === "unsecured" ? <ShieldCheck size={14} className="text-purple-400/80" /> : <CreditCard size={14} className="text-primary/70" />}
+                  <CreditCard size={14} className="text-primary/70" />
                   <div className="flex flex-col">
-                    <span className="text-xs text-white font-bold">{l.kind === "unsecured" ? "BNPL · Unsecured (TEE)" : "BNPL Loan"}</span>
-                    <a href={`https://suiscan.xyz/${SUI_NETWORK}/object/${l.id}`} target="_blank" rel="noopener noreferrer"
-                      className="text-[9px] text-primary/50 hover:text-primary font-mono">{l.id.slice(0, 10)}… ↗</a>
+                    <span className="text-xs text-white font-bold">BNPL Loan #{l.id}</span>
+                    <span className="text-[9px] text-primary/50 font-mono">Due ledger {l.view.due_ledger}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-xs text-white tabular-nums">{l.view.outstanding.toLocaleString()} USDC</span>
-                  <button onClick={() => onRepay(l)} disabled={!!repaying || !primaryCoin}
+                  <span className="text-xs text-white tabular-nums">{fromUnits(l.view.outstanding).toLocaleString()} USDC</span>
+                  <button onClick={() => onRepay(l)} disabled={!!repaying}
                     className="px-4 h-9 rounded-lg bg-primary/10 border border-primary/30 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 disabled:opacity-40 flex items-center gap-1.5">
                     {repaying === l.id ? <Loader2 size={12} className="animate-spin" /> : null} Repay
                   </button>
@@ -258,7 +237,7 @@ export default function CreditPage() {
             <TrendingUp className="text-primary" size={22} />
             <div>
               <div className="text-sm font-black uppercase tracking-widest">Lend / Borrow</div>
-              <p className="text-[11px] text-foreground/50 mt-1">Supply, borrow, repay & manage your TEE credit line.</p>
+              <p className="text-[11px] text-foreground/50 mt-1">Supply, borrow, repay & manage your credit line.</p>
             </div>
           </div>
           <ArrowUpRight className="text-foreground/40 group-hover:text-primary transition-colors" size={18} />

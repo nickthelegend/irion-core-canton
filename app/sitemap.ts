@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://app.xorr.finance";
+  const baseUrl = "https://app.irion.finance";
   const lastModified = "2026-06-19T00:00:00.000Z";
 
   return [

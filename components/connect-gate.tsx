@@ -2,10 +2,10 @@
 
 import type React from "react"
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button"
-import { useObolusWallet } from "@/lib/hooks/useObolusWallet"
+import { useStellarWallet } from "@/lib/stellar-wallet"
 
 export function ConnectGate({ children }: { children: React.ReactNode }) {
-  const { connected: authenticated, connecting } = useObolusWallet()
+  const { connected: authenticated, connecting } = useStellarWallet()
 
   if (connecting) {
     return (
@@ -27,7 +27,7 @@ export function ConnectGate({ children }: { children: React.ReactNode }) {
           </div>
           <h1 className="text-xl font-black uppercase tracking-tighter text-white mb-2 underline decoration-primary/20">AUTH_REQUIRED</h1>
           <p className="text-[10px] text-white/50 uppercase tracking-[0.1em] leading-relaxed max-w-[200px]">
-            Please connect your Sui wallet to access the XORR terminals.
+            Please connect your Stellar wallet to access the Irion terminals.
           </p>
         </div>
       </div>

@@ -21,6 +21,9 @@ export function AppHeader() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
+  // /pay is the Canton checkout — it has its own Carpincho connect; no Stellar header.
+  if (pathname?.startsWith("/pay")) return null
+
   return (
     <header className="sticky top-0 z-40 w-full pt-3 pb-2 ">
       <div
@@ -33,7 +36,8 @@ export function AppHeader() {
           <SidebarDrawer open={open} onOpenChange={setOpen} />
           <Link href="/" className="font-semibold tracking-wide">
             <span className="inline-flex items-center gap-2">
-              <Image src="/logo.png" alt="XORR" width={120} height={32} className="h-8 w-auto max-h-8" />
+              <Image src="/logo.png" alt="Irion" width={32} height={32} className="h-8 w-8" priority />
+              <span className="text-lg font-black tracking-tight text-white">Irion</span>
             </span>
           </Link>
         </div>

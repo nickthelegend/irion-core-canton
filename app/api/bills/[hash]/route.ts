@@ -14,7 +14,7 @@ export async function GET(
   }
 
   try {
-    // 1. Check local polaris-core DB first
+    // 1. Check local irion-core DB first
     const db = await getDb();
     const bill = await db.collection("bills").findOne({ hash });
 

@@ -41,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="space-y-2">
               <h1 className="text-2xl font-black text-white uppercase tracking-tighter">System_Failure</h1>
               <p className="text-sm text-foreground/40 leading-relaxed uppercase tracking-widest font-bold">
-                An unexpected error occurred in the XORR interface.
+                An unexpected error occurred in the IRION interface.
               </p>
             </div>
 
@@ -72,7 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="mt-8 flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
             <span className="text-[10px] text-foreground/20 font-black uppercase tracking-[0.3em]">
-              XORR Terminal · Error_Log_Transmitted
+              IRION Terminal · Error_Log_Transmitted
             </span>
           </div>
         </div>

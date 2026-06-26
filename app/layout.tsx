@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 })
 
-const SITE = "https://app.xorr.finance"
+const SITE = "https://app.irion.finance"
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -35,21 +35,21 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "XORR Finance — Buy Now, Pay Never · Private Credit on Sui",
-    template: "%s | XORR Finance",
+    default: "IRION Finance — Buy Now, Pay Never · Private Credit on Stellar",
+    template: "%s | IRION Finance",
   },
   description:
-    "XORR Finance is private consumer credit on Sui: Buy Now Pay Never (BNPL), lend/borrow USDC, and borrow against a credit score computed inside a confidential TEE. Your financial data never leaves the enclave.",
-  applicationName: "XORR Finance",
+    "IRION Finance is private consumer credit on Stellar: Buy Now Pay Never (BNPL), lend/borrow USDC, and borrow against a credit score proven with a zero-knowledge proof. Your financial data never leaves your device.",
+  applicationName: "IRION Finance",
   keywords: [
-    "XORR", "XORR Finance", "Buy Now Pay Never", "BNPL", "on-chain BNPL",
-    "Sui", "Sui lending", "Sui borrowing", "private credit", "TEE credit score",
+    "IRION", "IRION Finance", "Buy Now Pay Never", "BNPL", "on-chain BNPL",
+    "Stellar", "Stellar lending", "Stellar borrowing", "private credit", "zero-knowledge credit score",
     "confidential DeFi", "decentralized credit score", "under-collateralized loans",
     "yield-backed loans", "USDC", "pay later crypto",
   ],
-  authors: [{ name: "XORR Finance", url: SITE }],
-  creator: "XORR Finance",
-  publisher: "XORR Finance",
+  authors: [{ name: "IRION Finance", url: SITE }],
+  creator: "IRION Finance",
+  publisher: "IRION Finance",
   category: "finance",
   alternates: { canonical: "/" },
   robots: {
@@ -58,22 +58,22 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "XORR Finance",
+    siteName: "IRION Finance",
     url: SITE,
-    title: "XORR Finance — Buy Now, Pay Never · Private Credit on Sui",
+    title: "IRION Finance — Buy Now, Pay Never · Private Credit on Stellar",
     description:
-      "BNPL, lend/borrow, and a private TEE credit score on Sui. Checkout with credit, repay from yield.",
+      "BNPL, lend/borrow, and a private zero-knowledge credit score on Stellar. Checkout with credit, repay from yield.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "XORR Finance — Buy Now, Pay Never",
-    description: "Private consumer credit on Sui: BNPL, lend/borrow, and a TEE-computed credit score.",
-    site: "@XorrFinance",
-    creator: "@XorrFinance",
+    title: "IRION Finance — Buy Now, Pay Never",
+    description: "Private consumer credit on Stellar: BNPL, lend/borrow, and a zero-knowledge credit score.",
+    site: "@IrionFinance",
+    creator: "@IrionFinance",
   },
   icons: {
-    icon: [{ url: "/favicon.ico" }, { url: "/xorr-logo.png", type: "image/png" }],
+    icon: [{ url: "/favicon.ico" }, { url: "/logo.png", type: "image/png" }],
     apple: [{ url: "/apple-icon.png" }],
   },
   manifest: "/manifest.webmanifest",

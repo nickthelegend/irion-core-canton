@@ -1,43 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Db } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-
-export async function getPositionsFromDb(db: Db, wallet: string) {
-  return db
-    .collection("positions")
-    .find({ walletAddress: wallet.toLowerCase(), status: "active" })
-    .toArray();
-}
-
-export async function upsertPosition(
-  db: Db,
-  payload: {
-    walletAddress: string;
-    type: "SUPPLY" | "BORROW";
-    symbol: string;
-    entryAmount: number;
-    txHash: string;
-  }
-) {
-  const now = new Date();
-  const status = payload.entryAmount === 0 ? "closed" : "active";
-
-  return db.collection("positions").updateOne(
-    { txHash: payload.txHash },
-    {
-      $set: {
-        walletAddress: payload.walletAddress.toLowerCase(),
-        type: payload.type,
-        symbol: payload.symbol,
-        entryAmount: payload.entryAmount,
-        status,
-        updatedAt: now,
-      },
-      $setOnInsert: { createdAt: now },
-    },
-    { upsert: true }
-  );
-}
+import { getPositionsFromDb, upsertPosition } from "@/lib/db-queries";
 
 export async function GET(req: NextRequest) {
   const wallet = req.nextUrl.searchParams.get("wallet");

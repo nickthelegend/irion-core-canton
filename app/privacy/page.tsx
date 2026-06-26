@@ -23,7 +23,7 @@ export default function PrivacyPage() {
                         <div className="flex-1 p-6 md:p-8 font-mono text-xs leading-relaxed scrollbar-hide overflow-y-auto max-h-[700px] text-white/70">
                             <div className="mb-8 p-4 border-l-2 border-primary/20 bg-primary/[0.02]">
                                 <p className="italic">
-                                    "In the decentralized architecture of XORR, privacy is not a setting—it is a foundational protocol logic. This document outlines the technical constraints and cryptographic guarantees governing your data."
+                                    "In the decentralized architecture of IRION, privacy is not a setting—it is a foundational protocol logic. This document outlines the technical constraints and cryptographic guarantees governing your data."
                                 </p>
                             </div>
 
@@ -35,11 +35,11 @@ export default function PrivacyPage() {
                                     <div className="space-y-6">
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">TRANSACTION_IMMUTABILITY:</strong> All financial interactions (deposits, withdrawals, BNPL executions) are recorded on the Sui blockchain. These records are permanent and pseudonymous.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">TRANSACTION_IMMUTABILITY:</strong> All financial interactions (deposits, withdrawals, BNPL executions) are recorded on the Stellar blockchain. These records are permanent and pseudonymous.</p>
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">METADATA_CLEANSING:</strong> Off-chain relayers strip non-essential IP headers and device identifiers before broadcast. Your physical location is never stored on the XORR ledger.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">METADATA_CLEANSING:</strong> Off-chain relayers strip non-essential IP headers and device identifiers before broadcast. Your physical location is never stored on the IRION ledger.</p>
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
@@ -59,11 +59,11 @@ export default function PrivacyPage() {
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">ASYMMETRIC_KEYS:</strong> Secure communication between the XORR Terminal and the Liquidity Engine is signed using Ed25519 elliptic curve signatures.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">ASYMMETRIC_KEYS:</strong> Secure communication between the IRION Terminal and the Liquidity Engine is signed using Ed25519 elliptic curve signatures.</p>
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">NON_CUSTODIAL_DESIGN:</strong> XORR never stores private keys. All cryptographic authorizations must be signed via the user's connected hardware or software wallet.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">NON_CUSTODIAL_DESIGN:</strong> IRION never stores private keys. All cryptographic authorizations must be signed via the user's connected hardware or software wallet.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
                                     <div className="space-y-6">
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">ZK_IDENTITY:</strong> XORR utilizes Zero-Knowledge Proofs (zk-SNARKs) to verify creditworthiness without exposing the underlying financial history of the user.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">ZK_IDENTITY:</strong> IRION utilizes Zero-Knowledge Proofs (zk-SNARKs) to verify creditworthiness without exposing the underlying financial history of the user.</p>
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
