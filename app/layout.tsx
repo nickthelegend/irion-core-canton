@@ -35,16 +35,16 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "IRION Finance — Buy Now, Pay Never · Private Credit on Stellar",
+    default: "IRION Finance — Buy Now, Pay Never · Private Credit on Canton",
     template: "%s | IRION Finance",
   },
   description:
-    "IRION Finance is private consumer credit on Stellar: Buy Now Pay Never (BNPL), lend/borrow USDC, and borrow against a credit score proven with a zero-knowledge proof. Your financial data never leaves your device.",
+    "IRION Finance is private consumer credit on Canton: Buy Now Pay Never (BNPL), lend/borrow USDC, and borrow against a private credit line. Built on Daml — your balances and credit are visible only to you and the operator, never the network.",
   applicationName: "IRION Finance",
   keywords: [
     "IRION", "IRION Finance", "Buy Now Pay Never", "BNPL", "on-chain BNPL",
-    "Stellar", "Stellar lending", "Stellar borrowing", "private credit", "zero-knowledge credit score",
-    "confidential DeFi", "decentralized credit score", "under-collateralized loans",
+    "Canton", "Canton Network", "Daml", "Canton lending", "Canton borrowing", "private credit",
+    "confidential DeFi", "decentralized credit", "under-collateralized loans",
     "yield-backed loans", "USDC", "pay later crypto",
   ],
   authors: [{ name: "IRION Finance", url: SITE }],
@@ -60,15 +60,15 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "IRION Finance",
     url: SITE,
-    title: "IRION Finance — Buy Now, Pay Never · Private Credit on Stellar",
+    title: "IRION Finance — Buy Now, Pay Never · Private Credit on Canton",
     description:
-      "BNPL, lend/borrow, and a private zero-knowledge credit score on Stellar. Checkout with credit, repay from yield.",
+      "BNPL, lend/borrow, and a private credit line on Canton. Checkout with credit, repay from yield.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "IRION Finance — Buy Now, Pay Never",
-    description: "Private consumer credit on Stellar: BNPL, lend/borrow, and a zero-knowledge credit score.",
+    description: "Private consumer credit on Canton: BNPL, lend/borrow, and a private credit line.",
     site: "@IrionFinance",
     creator: "@IrionFinance",
   },

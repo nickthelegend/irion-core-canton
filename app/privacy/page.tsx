@@ -35,7 +35,7 @@ export default function PrivacyPage() {
                                     <div className="space-y-6">
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">TRANSACTION_IMMUTABILITY:</strong> All financial interactions (deposits, withdrawals, BNPL executions) are recorded on the Stellar blockchain. These records are permanent and pseudonymous.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">TRANSACTION_IMMUTABILITY:</strong> All financial interactions (deposits, withdrawals, BNPL executions) are recorded on the Canton Network as Daml contracts. Each record is visible only to the parties to that transaction — never the wider network.</p>
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
@@ -70,16 +70,16 @@ export default function PrivacyPage() {
 
                                 <div>
                                     <h3 className="text-primary text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-                                        [03] ZERO_KNOWLEDGE_PROOF_USAGE
+                                        [03] SUB_TRANSACTION_PRIVACY
                                     </h3>
                                     <div className="space-y-6">
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">ZK_IDENTITY:</strong> IRION utilizes Zero-Knowledge Proofs (zk-SNARKs) to verify creditworthiness without exposing the underlying financial history of the user.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">PER_PARTY_VISIBILITY:</strong> On Canton, a Daml contract is only disclosed to its signatory and observer parties. Your CreditProfile and loans are seen only by you and the operator — no zero-knowledge proof required.</p>
                                         </div>
                                         <div className="flex gap-4 items-start">
                                             <span className="text-primary font-bold mt-1 text-[10px] tracking-tight">{`>>`}</span>
-                                            <p><strong className="text-white uppercase tracking-tight">SOLVENCY_ATTESTATION:</strong> Liquidity pool solvency is proven cryptographically on an hourly basis, ensuring transparency without leaking specific trade secrets or participant sizes.</p>
+                                            <p><strong className="text-white uppercase tracking-tight">ENCRYPTED_ORDERING:</strong> The synchronizer that sequences and finalizes transactions sees only encrypted commitments, never the contract contents — so creditworthiness is verified without exposing your financial history.</p>
                                         </div>
                                     </div>
                                 </div>

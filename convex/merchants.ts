@@ -12,7 +12,7 @@ export const listPools = query({
 });
 
 /**
- * Sync or Create a Merchant User by their wallet address (via Privy).
+ * Sync or Create a Merchant User by their Canton wallet party.
  */
 export const syncUser = mutation({
     args: { walletAddress: v.string() },

@@ -19,12 +19,12 @@ export default function DocsPage() {
         <div className="p-8">
           <div className="mb-10">
             <h1 className="text-white text-sm font-black tracking-[0.2em] mb-1">IRION_DOCS</h1>
-            <p className="text-primary/60 text-[9px] font-bold uppercase tracking-[0.3em]">PRIVATE_CREDIT_ON_STELLAR</p>
+            <p className="text-primary/60 text-[9px] font-bold uppercase tracking-[0.3em]">PRIVATE_CREDIT_ON_CANTON</p>
           </div>
           <nav className="space-y-2">
             {[
               { id: "intro", label: "01_INTRODUCTION", icon: FolderOpen },
-              { id: "tee", label: "02_ZK_CREDIT", icon: ShieldCheck },
+              { id: "privacy", label: "02_PRIVATE_CREDIT", icon: ShieldCheck },
               { id: "pools", label: "03_LENDING_POOL", icon: Database },
               { id: "borrowing", label: "04_BORROW_LOGIC", icon: Zap },
               { id: "bnpl", label: "05_BNPL", icon: Lock },
@@ -39,7 +39,7 @@ export default function DocsPage() {
         <div className="mt-auto p-8 border-t border-white/5">
           <button className="w-full flex items-center justify-center gap-2 border border-primary/40 text-primary px-4 py-3 rounded-xl text-[10px] font-black hover:bg-primary/10 transition-all uppercase tracking-widest">
             <Code className="size-3" />
-            MOVE_SOURCE
+            VIEW_DAML
           </button>
         </div>
       </aside>
@@ -60,31 +60,32 @@ export default function DocsPage() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/30">SPECIFICATION</span>
             </h1>
             <p className="text-white/40 text-sm leading-relaxed max-w-2xl font-medium">
-              IRION is a BNPL and lend/borrow protocol on Stellar, with private credit scoring proven with a
-              zero-knowledge proof. Supply liquidity, borrow against collateral, or borrow unsecured against
-              your reputation — all settled on-chain in Move.
+              IRION is a BNPL and lend/borrow protocol on the Canton Network, with private credit modeled
+              as Daml contracts. Supply liquidity, borrow against collateral, or borrow unsecured against
+              your reputation — all settled atomically and privately on Canton.
             </p>
           </div>
 
           <div className="space-y-24 pb-32">
-            <section id="tee" className="space-y-6">
+            <section id="privacy" className="space-y-6">
               <div className="flex items-center gap-4">
                 <span className="text-primary font-mono text-sm">[1.0]</span>
-                <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">THE_ZK_ADVANTAGE</h3>
+                <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">PRIVACY_BY_CONSTRUCTION</h3>
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
-                A zero-knowledge proof evaluates your repayment history and external footprint, then signs a credit
-                score that is attested to your on-chain CreditProfile. Your raw financial data never leaves your device —
-                only the resulting score and limit become visible on Stellar.
+                Your CreditProfile and CreditAttestation are Daml contracts whose only informees are you and the
+                operator. No other participant — not even other IRION users — can see your score, limit, or loans.
+                The synchronizer that orders transactions sees only encrypted commitments, never your data. There is
+                no zero-knowledge prover: on Canton, privacy is built into the ledger.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-3">
                   <h4 className="text-primary text-[10px] font-black uppercase tracking-[0.2em]">Private_Scoring</h4>
-                  <p className="text-[10px] text-white/40 leading-relaxed font-bold uppercase italic tracking-tighter">Inputs are processed inside the enclave; only an attested score reaches the chain.</p>
+                  <p className="text-[10px] text-white/40 leading-relaxed font-bold uppercase italic tracking-tighter">The operator attests a score into a CreditProfile contract shared only with you — sub-transaction privacy keeps it off the public record.</p>
                 </div>
                 <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-3">
                   <h4 className="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em]">Unsecured_Credit</h4>
-                  <p className="text-[10px] text-white/40 leading-relaxed font-bold uppercase italic tracking-tighter">A score above the threshold unlocks collateral-free borrowing in the money market.</p>
+                  <p className="text-[10px] text-white/40 leading-relaxed font-bold uppercase italic tracking-tighter">A score above the threshold unlocks collateral-free borrowing against your private credit line.</p>
                 </div>
               </div>
             </section>
@@ -95,11 +96,11 @@ export default function DocsPage() {
                 <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">LENDING_POOL</h3>
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
-                Liquidity providers supply USDC to the shared lending pool and receive shares. Borrowers
-                draw against the pool; interest and harvested Blend yield accrue back to suppliers.
+                Liquidity providers supply USDC to the shared lending pool and receive PoolShare contracts. Borrowers
+                draw against the pool; interest and harvested yield accrue back to suppliers — settled atomically in Daml.
               </p>
 
-              {/* Terminal Code Block */}
+              {/* Daml Code Block */}
               <div className="bg-zinc-950 rounded-2xl overflow-hidden border border-white/10 shadow-3xl">
                 <div className="bg-white/5 px-6 py-3 flex items-center justify-between border-b border-white/5">
                   <div className="flex gap-2">
@@ -107,17 +108,20 @@ export default function DocsPage() {
                     <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
                     <div className="w-3 h-3 rounded-full bg-green-500/50" />
                   </div>
-                  <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Rust // contracts/core/src/lib.rs</span>
+                  <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Daml // Irion/Pool.daml</span>
                 </div>
                 <div className="p-8 font-mono text-[11px] leading-relaxed text-white/80">
-                  <div><span className="text-primary font-bold">pub fn</span> <span className="text-blue-400 font-bold">supply</span>(env: Env, from: Address, amount: i128) -&gt; i128 {'{'}</div>
-                  <div className="pl-6 text-white/50 italic">// Supply liquidity, mint pro-rata shares to the supplier</div>
-                  <div className="pl-6">from.<span className="text-primary">require_auth</span>();</div>
-                  <div className="pl-6"><span className="text-white">let</span> shares = amount * total_shares / total_assets;</div>
-                  <div className="pl-6">token::Client::new(&env, &usdc).<span className="text-primary">transfer</span>(&from, &this, &amount);</div>
-                  <div className="pl-6"><span className="text-primary">Self</span>::add(&env, Available, amount);</div>
-                  <div className="pl-6">shares</div>
-                  <div>{'}'}</div>
+                  <div><span className="text-primary font-bold">template</span> <span className="text-blue-400 font-bold">SupplyRequest</span></div>
+                  <div className="pl-4"><span className="text-primary font-bold">with</span></div>
+                  <div className="pl-8">operator : Party; supplier : Party; amount : Decimal</div>
+                  <div className="pl-4"><span className="text-primary font-bold">where</span></div>
+                  <div className="pl-8"><span className="text-primary">signatory</span> supplier</div>
+                  <div className="pl-8"><span className="text-primary">observer</span> operator</div>
+                  <div className="pl-8 mt-2"><span className="text-primary font-bold">choice</span> SupplyRequest_Accept : ContractId PoolShare</div>
+                  <div className="pl-12"><span className="text-primary font-bold">with</span> poolCid : ContractId LendingPool</div>
+                  <div className="pl-12"><span className="text-primary font-bold">controller</span> operator</div>
+                  <div className="pl-12 text-white/50 italic">-- mint pro-rata pool shares to the supplier</div>
+                  <div className="pl-12"><span className="text-primary font-bold">do</span> exercise poolCid LendingPool_AddLiquidity <span className="text-primary font-bold">with</span> amount</div>
                 </div>
               </div>
             </section>
@@ -128,15 +132,16 @@ export default function DocsPage() {
                 <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">BORROW_LOAN_TO_VALUE</h3>
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
-                Collateralized borrows lock 150% USDC collateral and mint a CollateralizedPosition. Unsecured borrows
-                require no collateral — they are gated by the zero-knowledge credit score and the profile&apos;s available credit line.
+                Collateralized borrows lock 150% USDC collateral and create a Loan co-signed by the operator and the
+                borrower. Unsecured borrows require no collateral — they are gated by your private credit attestation
+                and the available credit line on your CreditProfile.
               </p>
               <div className="p-8 bg-primary/5 border border-primary/20 rounded-2xl">
                  <div className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">COLLATERAL_LOGIC</div>
                  <div className="text-sm font-black text-white leading-relaxed font-mono italic">
                     Required_Collateral = Borrow_Amount * 150%
                  </div>
-                 <div className="text-[10px] text-white/30 mt-4 uppercase font-bold">Repay principal + 5% fee // collateral released on settle</div>
+                 <div className="text-[10px] text-white/30 mt-4 uppercase font-bold">Repay principal + fee // collateral released on Loan_Pay</div>
               </div>
             </section>
 
@@ -146,7 +151,7 @@ export default function DocsPage() {
                 <h3 className="text-2xl font-black tracking-tight uppercase italic text-white">BUY_NOW_PAY_NEVER</h3>
               </div>
               <p className="text-white/60 text-xs leading-relaxed uppercase tracking-wider">
-                A BNPL purchase fronts the merchant from pool liquidity and opens a Loan against your CreditProfile.
+                A BNPL purchase fronts the merchant from pool liquidity and creates a Loan against your CreditProfile.
                 Routed yield can auto-repay the loan over time — pay never, in the ideal case. On-time repayment grows
                 your credit limit.
               </p>
@@ -165,7 +170,7 @@ export default function DocsPage() {
                 { label: "ARCH_SUMMARY", pct: "100%" },
                 { label: "POOL_SPECS", pct: "100%" },
                 { label: "BORROW_API", pct: "85%" },
-                { label: "ZK_ATTEST", pct: "60%" },
+                { label: "DAML_ATTEST", pct: "60%" },
               ].map(p => (
                 <div key={p.label} className="space-y-3">
                   <div className="flex justify-between text-[9px] font-black text-white/60">
@@ -183,7 +188,7 @@ export default function DocsPage() {
           <div className="p-6 bg-[#1a1c22] border border-white/5 rounded-2xl space-y-4">
              <Terminal className="text-primary size-5" />
              <p className="text-[10px] font-black text-white uppercase tracking-wider">Integration Support</p>
-             <p className="text-[9px] text-white/30 uppercase leading-relaxed">Reach the IRION team for Stellar testnet integration support and contract addresses.</p>
+             <p className="text-[9px] text-white/30 uppercase leading-relaxed">Reach the IRION team for Canton integration support and contract package IDs.</p>
           </div>
         </div>
       </aside>

@@ -1,6 +1,5 @@
 "use client"
 
-import { ConnectGate } from "@/components/connect-gate"
 import {
     Terminal,
     MessageSquare,
@@ -18,7 +17,7 @@ import {
 
 export default function SupportPage() {
     return (
-        <ConnectGate>
+        <>
             <div className="flex-1 flex flex-col py-8 gap-6 w-full font-mono">
                 <div className="flex flex-col gap-1 mb-4">
                     <span className="font-mono text-[10px] tracking-[0.4em] text-primary/60 uppercase">Operational_Interface // v4.2.0</span>
@@ -101,7 +100,7 @@ export default function SupportPage() {
                                     { title: "REPAYMENT_LOGIC", desc: "Understanding automated BNPL settlements and health factor protection thresholds.", icon: Calculator },
                                     { title: "NETWORK_LATENCY_FAQ", desc: "Diagnostics for inter-chain settlement delay and RPC endpoint synchronization.", icon: Monitor },
                                     { title: "VAULT_ARCHITECTURE_SEC", desc: "Overview of L3 secure vault implementations and collateral isolation layers.", icon: Shield },
-                                    { title: "STELLAR_WALLET_SETUP", desc: "Documentation on connecting a Stellar wallet and getting testnet USDC.", icon: LinkIcon }
+                                    { title: "CANTON_WALLET_SETUP", desc: "Documentation on connecting the Carpincho wallet on Canton and funding test USDC.", icon: LinkIcon }
                                 ].map((item, idx) => (
                                     <div key={idx} className="p-4 border-b border-white/5 hover:bg-primary/5 transition-colors cursor-pointer group">
                                         <div className="flex items-start justify-between">
@@ -132,12 +131,12 @@ export default function SupportPage() {
                                 </h3>
                             </div>
                             <p className="text-white/70 text-[11px] leading-relaxed font-mono uppercase">
-                                <span className="text-primary font-bold">[!]</span> Maintenance scheduled for <span className="text-white font-bold">STELLAR_TESTNET</span> in 12 hours. Some operations may experience elevated latency.
+                                <span className="text-primary font-bold">[!]</span> Maintenance scheduled for the <span className="text-white font-bold">CANTON_SYNCHRONIZER</span> in 12 hours. Some operations may experience elevated latency.
                             </p>
                         </div>
                     </section>
                 </div>
             </div>
-        </ConnectGate>
+        </>
     )
 }

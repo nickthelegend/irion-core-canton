@@ -3,13 +3,13 @@
 import { Shield } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useStellarWallet } from "@/lib/stellar-wallet"
 
 export function AppFooter() {
     const pathname = usePathname()
-    const { connected: authenticated } = useStellarWallet()
 
-    if (pathname === "/" && !authenticated) return null
+    // /pay (checkout) + /app (wallet) are Canton surfaces with their own chrome.
+    if (pathname?.startsWith("/pay") || pathname?.startsWith("/app")) return null
+
     return (
         <footer className="w-full flex flex-col md:flex-row justify-between items-center py-6 px-6 md:px-12 border-t border-white/5 gap-6 opacity-40 font-mono">
             <div className="flex items-center gap-8">
@@ -19,7 +19,7 @@ export function AppFooter() {
                 </div>
                 <div className="text-[10px] flex items-center gap-1 font-bold uppercase tracking-[0.2em]">
                     <Shield className="w-3 h-3" />
-                    VAULT_SECURE_C1
+                    CANTON_PRIVATE
                 </div>
             </div>
             <div className="flex gap-6">

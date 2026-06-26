@@ -77,7 +77,7 @@ const nextConfig = {
 
     // Stub out React Native / non-browser transitive deps that can't be
     // resolved in a web build. These are pulled in by @metamask/sdk (via
-    // RainbowKit), @privy-io/react-auth
+    // RainbowKit).
     config.resolve.alias = {
       ...config.resolve.alias,
       '@react-native-async-storage/async-storage': false,

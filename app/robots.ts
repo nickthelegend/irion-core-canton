@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/pay/", "/positions", "/transactions"],
+        disallow: ["/api/", "/pay/"],
       },
     ],
     sitemap: "https://app.irion.finance/sitemap.xml",

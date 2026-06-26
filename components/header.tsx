@@ -3,26 +3,19 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
-import { SidebarDrawer } from "./sidebar-drawer"
+import { Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button"
 
 const NAV = [
-  { href: "/lend", label: "Lend" },
-  { href: "/borrow", label: "Borrow" },
-  { href: "/credit", label: "Credit" },
-  { href: "/positions", label: "Positions" },
-  { href: "/transactions", label: "Activity" },
-  { href: "/faucet", label: "Faucet" },
+  { href: "/app", label: "Wallet" },
+  { href: "/docs", label: "Docs" },
 ]
 
 export function AppHeader() {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
 
-  // /pay is the Canton checkout — it has its own Carpincho connect; no Stellar header.
-  if (pathname?.startsWith("/pay")) return null
+  // /pay (checkout) + /app (wallet) are Canton — they have their own Carpincho connect.
+  if (pathname?.startsWith("/pay") || pathname?.startsWith("/app")) return null
 
   return (
     <header className="sticky top-0 z-40 w-full pt-3 pb-2 ">
@@ -31,9 +24,8 @@ export function AppHeader() {
         role="navigation"
         aria-label="Main"
       >
-        {/* Left: menu icon + logo */}
+        {/* Left: logo */}
         <div className="flex items-center gap-2">
-          <SidebarDrawer open={open} onOpenChange={setOpen} />
           <Link href="/" className="font-semibold tracking-wide">
             <span className="inline-flex items-center gap-2">
               <Image src="/logo.png" alt="Irion" width={32} height={32} className="h-8 w-8" priority />
@@ -42,7 +34,7 @@ export function AppHeader() {
           </Link>
         </div>
 
-        {/* Center: nav, centered horizontally */}
+        {/* Center: nav */}
         <nav className="hidden sm:flex items-center justify-center gap-2">
           {NAV.map((n) => (
             <Link
@@ -60,9 +52,14 @@ export function AppHeader() {
           ))}
         </nav>
 
-        {/* Right: wallet actions */}
+        {/* Right: open the Canton wallet */}
         <div className="flex items-center justify-end gap-3 min-w-0">
-          <ConnectWalletButton />
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-black uppercase tracking-widest text-black transition-transform hover:scale-[1.03]"
+          >
+            <Wallet size={15} /> Open Wallet
+          </Link>
         </div>
       </div>
     </header>

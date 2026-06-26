@@ -106,3 +106,54 @@ export async function completeBnplLoan(party: string): Promise<BnplResult> {
   }
   return body as BnplResult
 }
+
+// ── Consumer wallet: faucet · positions · borrow · repay ────────────────────
+const dec = (n: number): string => (String(n).includes(".") ? String(n) : `${n}.0`)
+
+async function jpost<T>(path: string, body: unknown): Promise<T> {
+  const r = await fetch(`${B2B_API_URL}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+  const j = (await r.json().catch(() => ({}))) as any
+  if (!r.ok || j.error) throw new Error(j.error ?? `${path} failed (${r.status})`)
+  return j as T
+}
+
+export interface ConsumerLoan { id: string; principal: number; outstanding: number; principalRepaid: number; kind: string; status: string; merchant?: string }
+export interface Positions {
+  party: string
+  balance: number
+  yield: { shares: number; value: number }
+  loans: ConsumerLoan[]
+  credit: { creditLimit: number; outstanding: number; available?: number; score: number } | null
+}
+export interface RepayContext { loanCid: string; payTokenCid: string; poolCid: string; profileCid: string; configCid: string }
+
+/** Mint test USDC to the wallet (operator-signed; no user signature needed). */
+export const faucet = (party: string, amount = 100) => jpost<{ balance: number }>("/v1/wallet/faucet", { party, amount })
+
+/** Read the wallet's full on-ledger position. */
+export async function getPositions(party: string): Promise<Positions> {
+  const r = await fetch(`${B2B_API_URL}/v1/wallet/positions?party=${encodeURIComponent(party)}`)
+  const j = (await r.json().catch(() => ({}))) as any
+  if (!r.ok || j.error) throw new Error(j.error ?? `positions failed (${r.status})`)
+  return j as Positions
+}
+
+/** Borrow against the credit line: the wallet has already signed an UnsecuredRequest;
+ * the operator ensures credit + accepts it → a Loan disburses USDC to the wallet. */
+export const completeBorrow = (party: string) => jpost<BnplResult>("/v1/wallet/bnpl/complete", { party })
+
+/** Get the cids the wallet needs to self-sign Loan_Pay. */
+export const repayContext = (party: string, loanId: string, amount: number) =>
+  jpost<RepayContext>("/v1/wallet/repay/context", { party, loanId, amount })
+
+/** Build the user-signed Loan_Pay command (repay). */
+export function buildRepayCommand(party: string, ctx: RepayContext, amount: number): unknown {
+  return {
+    ExerciseCommand: {
+      templateId: "#irion-model:Irion.Bnpl:Loan",
+      contractId: ctx.loanCid,
+      choice: "Loan_Pay",
+      choiceArgument: { payer: party, payTokenCid: ctx.payTokenCid, amount: dec(amount), poolCid: ctx.poolCid, profileCid: ctx.profileCid, configCid: ctx.configCid },
+    },
+  }
+}

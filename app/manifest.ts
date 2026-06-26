@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "IRION Finance",
     short_name: "IRION",
-    description: "Private consumer credit on Stellar — BNPL, lend/borrow, and a zero-knowledge credit score.",
+    description: "Private consumer credit on Canton — BNPL, lend/borrow, and a private credit line.",
     start_url: "/",
     display: "standalone",
     background_color: "#05080f",

@@ -3,7 +3,7 @@ import { v } from "convex/values";
 
 export default defineSchema({
   users: defineTable({
-    walletAddress: v.string(), // EOA or Privy Address
+    walletAddress: v.string(), // Canton party id
     email: v.optional(v.string()),
     name: v.optional(v.string()),
     role: v.optional(v.string()), // merchant, user, admin

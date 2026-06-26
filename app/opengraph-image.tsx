@@ -87,7 +87,7 @@ export default async function Image() {
               textAlign: "center",
             }}
           >
-            Private consumer credit on Stellar — BNPL, lending, and a credit score proven with a zero-knowledge proof.
+            Private consumer credit on Canton — BNPL, lending, and a credit line in a private Daml contract.
           </div>
         </div>
 
@@ -105,7 +105,7 @@ export default async function Image() {
             fontSize: "16px",
           }}
         >
-          <span>SECURED BY ZERO-KNOWLEDGE PROOF</span>
+          <span>PRIVATE BY CONSTRUCTION ON CANTON</span>
           <span>APP.IRION.FINANCE</span>
         </div>
       </div>
