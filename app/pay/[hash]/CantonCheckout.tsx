@@ -7,10 +7,10 @@ import {
 import Link from "next/link"
 import { toast } from "sonner"
 import {
-  ConnectKitProvider, useConnect, useExecute, useParty, useSignMessage, useWalletStatus,
+  ConnectKitProvider, useConnect, useExecute, useParty, useWalletStatus,
 } from "@/lib/canton-connect-kit"
 import type { ConnectKitConfig } from "@/lib/canton-connect-kit"
-import { buildBnplCommand, fetchOperatorParty, settleCheckout, type CheckoutMode } from "@/lib/canton-pay"
+import { buildBnplCommand, buildDirectCommand, fetchOperatorParty, prepareDirect, settleCheckout, type CheckoutMode } from "@/lib/canton-pay"
 
 const CONNECT_CONFIG: ConnectKitConfig = {
   appName: "Irion Checkout",
@@ -49,7 +49,7 @@ const log = (...a: unknown[]) => console.log("%c[irion/pay]", "color:#a6f24a;fon
 // Method metadata, in display order (Credit first — the private headline).
 const METHODS: Record<CheckoutMode, { label: string; tag: string; blurb: string; icon: typeof Zap; primary?: boolean }> = {
   credit: { label: "Pay with Private Credit", tag: "Private", blurb: "Your attested credit line covers it — income & balances stay private by construction.", icon: ShieldCheck, primary: true },
-  bnpl: { label: "Buy Now, Pay Never", tag: "BNPL", blurb: "The pool pays the merchant now; repay from yield, anytime, on /credit.", icon: Clock },
+  bnpl: { label: "Buy Now, Pay Never", tag: "BNPL", blurb: "The pool pays the merchant now; repay from yield, anytime, in your wallet.", icon: Clock },
   direct: { label: "Pay in Full", tag: "Direct", blurb: "Settle the full amount now in USDC on Canton.", icon: CreditCard },
 }
 const ORDER: CheckoutMode[] = ["credit", "bnpl", "direct"]
@@ -67,7 +67,6 @@ function CheckoutInner({ bill }: { bill: CantonBill }) {
   const { party } = useParty()
   const { isLocked } = useWalletStatus()
   const { execute } = useExecute()
-  const { signMessage } = useSignMessage()
 
   const [operator, setOperator] = useState<string | undefined>(undefined)
   const [setupError, setSetupError] = useState<string | undefined>(undefined)
@@ -119,6 +118,7 @@ function CheckoutInner({ bill }: { bill: CantonBill }) {
     log(`pay → ${mode}`, { amount: bill.amount, merchant: bill.party, customer: party.partyId })
     setBusy(mode); setError(undefined)
     try {
+      let directTxHash: string | undefined
       if (mode === "credit" || mode === "bnpl") {
         if (operator === undefined) throw new Error("Operator unavailable — is the Irion API (:8088) running?")
         toast.info("Approve the loan request in Carpincho…")
@@ -127,15 +127,20 @@ function CheckoutInner({ bill }: { bill: CantonBill }) {
         log("signed + executed:", res)
         toast.success("Loan request signed ✓")
       } else {
-        toast.info("Authorize the payment in Carpincho…")
-        log("signMessage (authorize direct payment)…")
-        const sig = await signMessage(`Authorize ${bill.amount} USDC to ${bill.merchant} on Canton`)
-        log("signed message:", sig)
-        toast.success("Payment authorized ✓")
+        // DIRECT: a real on-ledger debit — the shopper signs a Token_Transfer of
+        // `amount` straight to the merchant (no operator mint-to-merchant).
+        if (!bill.party) throw new Error("This bill has no merchant settlement party.")
+        toast.info("Approve the payment in Carpincho…")
+        log("direct: prepare funded token + sign Token_Transfer → merchant…")
+        const { tokenCid } = await prepareDirect(party.partyId, bill.amount)
+        const res = await execute({ commands: [buildDirectCommand(tokenCid, bill.party)] })
+        directTxHash = String((res as { updateId?: string; completionOffset?: string } | undefined)?.updateId ?? (res as { completionOffset?: string } | undefined)?.completionOffset ?? "")
+        log("direct transfer signed + executed:", res)
+        toast.success("Payment signed ✓")
       }
       toast.info("Settling on Canton…")
       log("settleCheckout via b2b…")
-      const r = await settleCheckout({ party: party.partyId, merchant: bill.party, amount: bill.amount, mode, billHash: bill.hash })
+      const r = await settleCheckout({ party: party.partyId, merchant: bill.party, amount: bill.amount, mode, billHash: bill.hash, txHash: directTxHash })
       log("settled:", r)
       setSuccess({ mode, txHash: r.txHash, loanId: r.loanId })
       toast.success(`Paid ${bill.amount} USDC — settled on Canton`)
@@ -157,7 +162,7 @@ function CheckoutInner({ bill }: { bill: CantonBill }) {
         <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center"><CheckCircle2 className="w-10 h-10 text-primary" /></div>
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-black uppercase tracking-tighter">{success.mode === "direct" ? "Payment_Settled" : "Bought_On_Credit"}</h1>
-          <p className="text-[10px] text-white/40 uppercase">{meta.tag} · settled on Canton{success.loanId ? " · repay anytime on /credit" : ""}.</p>
+          <p className="text-[10px] text-white/40 uppercase">{meta.tag} · settled on Canton{success.loanId ? " · repay anytime in your wallet" : ""}.</p>
         </div>
         <div className="w-full bg-white/5 border border-white/10 p-4 rounded flex flex-col gap-3">
           <Row label="Merchant" value={bill.merchant} />
@@ -165,7 +170,7 @@ function CheckoutInner({ bill }: { bill: CantonBill }) {
           <Row label={success.loanId ? "Loan" : "Ref"} value={short(success.txHash)} />
         </div>
         {success.loanId && (
-          <Link href="/credit" className="w-full bg-white/5 border border-white/10 py-3 rounded text-[10px] font-black uppercase text-white hover:bg-white/10 text-center">Manage / Repay Loan</Link>
+          <Link href="/app" className="w-full bg-white/5 border border-white/10 py-3 rounded text-[10px] font-black uppercase text-white hover:bg-white/10 text-center">Manage / Repay Loan</Link>
         )}
       </div>
     )

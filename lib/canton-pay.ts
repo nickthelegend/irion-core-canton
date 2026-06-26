@@ -69,6 +69,7 @@ export async function settleCheckout(opts: {
   amount: number
   mode: CheckoutMode
   billHash?: string
+  txHash?: string
 }): Promise<CheckoutResult> {
   const r = await fetch(`${B2B_API_URL}/v1/wallet/checkout`, {
     method: "POST",
@@ -156,4 +157,18 @@ export function buildRepayCommand(party: string, ctx: RepayContext, amount: numb
       choiceArgument: { payer: party, payTokenCid: ctx.payTokenCid, amount: dec(amount), poolCid: ctx.poolCid, profileCid: ctx.profileCid, configCid: ctx.configCid },
     },
   }
+}
+
+// ── Direct checkout: a REAL self-custody debit (shopper signs Token_Transfer → merchant) ──
+const TOKEN_TID = "#irion-model:Irion.Token:Token"
+
+/** Operator funds the shopper `amount` (demo on-ramp) and returns the token cid
+ * the shopper then transfers to the merchant — the real settlement is the
+ * shopper-signed transfer below, not an operator mint-to-merchant. */
+export const prepareDirect = (party: string, amount: number) =>
+  jpost<{ tokenCid: string; amount: number }>("/v1/wallet/direct/prepare", { party, amount })
+
+/** Build the user-signed Token_Transfer for a direct payment to the merchant. */
+export function buildDirectCommand(tokenCid: string, merchant: string): unknown {
+  return { ExerciseCommand: { templateId: TOKEN_TID, contractId: tokenCid, choice: "Token_Transfer", choiceArgument: { newOwner: merchant } } }
 }
