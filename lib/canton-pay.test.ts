@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { buildBnplCommand, buildDirectCommand, buildRepayCommand } from "./canton-pay.ts"
+import { buildBnplCommand, buildDirectCommand, buildRepayCommand, buildSupplyEscrowCommand, buildSupplyRequestCommand } from "./canton-pay.ts"
 
 test("buildBnplCommand: UnsecuredRequest create command, decimal-formatted", () => {
   const cmd: any = buildBnplCommand({ operator: "op::1", borrower: "b::1", amount: 45 })
@@ -24,6 +24,25 @@ test("buildDirectCommand: a Token_Transfer to the merchant party", () => {
   assert.equal(cmd.ExerciseCommand.contractId, "tok#1")
   assert.equal(cmd.ExerciseCommand.choice, "Token_Transfer")
   assert.equal(cmd.ExerciseCommand.choiceArgument.newOwner, "merch::1")
+})
+
+test("buildSupplyEscrowCommand: Token_Transfer escrowing to the operator", () => {
+  const cmd: any = buildSupplyEscrowCommand("tok#9", "op::1")
+  assert.equal(cmd.ExerciseCommand.templateId, "#irion-model:Irion.Token:Token")
+  assert.equal(cmd.ExerciseCommand.contractId, "tok#9")
+  assert.equal(cmd.ExerciseCommand.choice, "Token_Transfer")
+  assert.equal(cmd.ExerciseCommand.choiceArgument.newOwner, "op::1")
+})
+
+test("buildSupplyRequestCommand: SupplyRequest create with decimal amount", () => {
+  const cmd: any = buildSupplyRequestCommand({ operator: "op::1", supplier: "s::1", usdcIssuer: "iss::1", amount: 100, escrowCid: "esc#1" })
+  assert.equal(cmd.CreateCommand.templateId, "#irion-model:Irion.Pool:SupplyRequest")
+  const a = cmd.CreateCommand.createArguments
+  assert.equal(a.operator, "op::1")
+  assert.equal(a.supplier, "s::1")
+  assert.equal(a.usdcIssuer, "iss::1")
+  assert.equal(a.amount, "100.0")
+  assert.equal(a.escrowCid, "esc#1")
 })
 
 test("buildRepayCommand: Loan_Pay carrying the repay context", () => {

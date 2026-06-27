@@ -172,3 +172,36 @@ export const prepareDirect = (party: string, amount: number) =>
 export function buildDirectCommand(tokenCid: string, merchant: string): unknown {
   return { ExerciseCommand: { templateId: TOKEN_TID, contractId: tokenCid, choice: "Token_Transfer", choiceArgument: { newOwner: merchant } } }
 }
+
+// ── Consumer supply: earn yield (shopper signs escrow + SupplyRequest; operator accepts) ──
+// Uses the EXISTING Pool templates — the same request/accept pattern as BNPL, so no
+// Daml SupplyDirect choice / DAR rebuild is needed (verified headlessly in the b2b-api).
+const SUPPLY_REQUEST_TID = "#irion-model:Irion.Pool:SupplyRequest"
+
+export interface SupplyContext { operator: string; usdcIssuer: string }
+
+/** Parties the wallet needs to build the supply commands. */
+export const supplyContext = async (): Promise<SupplyContext> => {
+  const r = await fetch(`${B2B_API_URL}/v1/wallet/supply/context`)
+  if (!r.ok) throw new Error(`supply context failed (${r.status})`)
+  return (await r.json()) as SupplyContext
+}
+
+/** Step 1: escrow the supply amount to the operator (shopper signs a Token_Transfer). */
+export function buildSupplyEscrowCommand(tokenCid: string, operator: string): unknown {
+  return { ExerciseCommand: { templateId: TOKEN_TID, contractId: tokenCid, choice: "Token_Transfer", choiceArgument: { newOwner: operator } } }
+}
+
+/** Step 2: create the SupplyRequest the operator will accept (shopper signs). */
+export function buildSupplyRequestCommand(opts: { operator: string; supplier: string; usdcIssuer: string; amount: number; escrowCid: string }): unknown {
+  return {
+    CreateCommand: {
+      templateId: SUPPLY_REQUEST_TID,
+      createArguments: { operator: opts.operator, supplier: opts.supplier, usdcIssuer: opts.usdcIssuer, amount: dec(opts.amount), escrowCid: opts.escrowCid },
+    },
+  }
+}
+
+/** After the shopper signs both steps, the operator accepts → a PoolShare (yield position). */
+export const completeSupply = (party: string) =>
+  jpost<{ status: string; supplier: string; shares: number }>("/v1/wallet/supply/complete", { party })
