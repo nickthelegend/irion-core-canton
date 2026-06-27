@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import {
   Wallet, ShieldCheck, Coins, TrendingUp, CreditCard, Droplets, ArrowDownToLine,
-  AlertCircle, Loader2, Lock, RefreshCw,
+  AlertCircle, Loader2, Lock, RefreshCw, Sprout, ArrowUpFromLine,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -12,7 +12,7 @@ import {
 import type { ConnectKitConfig } from "@/lib/canton-connect-kit"
 import {
   fetchOperatorParty, buildBnplCommand, completeBorrow, faucet, getPositions,
-  buildRepayCommand, repayContext, type Positions, type ConsumerLoan,
+  buildRepayCommand, repayContext, supply, redeemYield, type Positions, type ConsumerLoan,
 } from "@/lib/canton-pay"
 
 const CONNECT_CONFIG: ConnectKitConfig = {
@@ -44,7 +44,7 @@ const fmt = (n: number | undefined): string =>
   typeof n === "number" && Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "—"
 
 // Per-action flow identifiers (drives the busy spinner + disabled state).
-type Flow = "faucet" | "borrow" | { repay: string }
+type Flow = "faucet" | "borrow" | "supply" | "redeem" | { repay: string }
 const sameFlow = (a: Flow | null, b: Flow): boolean => {
   if (a === null) return false
   if (typeof a === "string" || typeof b === "string") return a === b
@@ -71,6 +71,7 @@ function WalletInner() {
   const [loadingPositions, setLoadingPositions] = useState(false)
   const [busy, setBusy] = useState<Flow | null>(null)
   const [amount, setAmount] = useState<number>(25)
+  const [supplyAmount, setSupplyAmount] = useState<number>(50)
 
   // Resolve the operator party (needed to borrow) on mount.
   useEffect(() => {
@@ -152,6 +153,41 @@ function WalletInner() {
       await reload()
     } catch (e) {
       console.error("[irion/app] borrow failed:", e)
+      toast.error(errMsg(e))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  // Supply USDC to the yield pool (earn). Demo: operator-mediated like the faucet
+  // — the on-ledger effect is a real SupplyRequest+accept → PoolShare.
+  const onSupply = async (): Promise<void> => {
+    if (!party || supplyAmount <= 0) return
+    setBusy("supply")
+    try {
+      log("supply", { supplier: party.partyId, amount: supplyAmount })
+      const r = await supply(party.partyId, supplyAmount)
+      toast.success(`Supplied ${supplyAmount} USDC · ${r.shares} shares`)
+      await reload()
+    } catch (e) {
+      console.error("[irion/app] supply failed:", e)
+      toast.error(errMsg(e))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  // Redeem the yield position back to USDC.
+  const onRedeem = async (): Promise<void> => {
+    if (!party) return
+    setBusy("redeem")
+    try {
+      log("redeem yield →", party.partyId)
+      await redeemYield(party.partyId)
+      toast.success("Redeemed yield to USDC")
+      await reload()
+    } catch (e) {
+      console.error("[irion/app] redeem failed:", e)
       toast.error(errMsg(e))
     } finally {
       setBusy(null)
@@ -256,6 +292,31 @@ function WalletInner() {
                 {sameFlow(busy, "borrow") ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Borrow on Credit
               </button>
             </div>
+          </div>
+
+          {/* Earn — supply to the yield pool */}
+          <div className="glass-card rounded-lg border border-primary/20 p-5 flex flex-col gap-4 shadow-xl">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary"><Sprout className="w-4 h-4" /> Earn — Supply to Pool</div>
+              {positions && positions.yield.shares > 0 && (
+                <button onClick={() => void onRedeem()} disabled={busy !== null} className="py-1.5 px-3 rounded-lg bg-white/5 border border-white/10 text-white font-black text-[9px] uppercase tracking-[0.15em] hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5">
+                  {sameFlow(busy, "redeem") ? <Loader2 className="w-3 h-3 animate-spin" /> : <ArrowUpFromLine className="w-3 h-3" />} Redeem {fmt(positions.yield.value)} USDC
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-white/40 normal-case leading-relaxed font-medium">Supply idle USDC to the Irion lending pool and earn yield — mints a real PoolShare on Canton.</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="number" min={1} value={supplyAmount}
+                onChange={(e) => setSupplyAmount(Number(e.target.value))}
+                disabled={busy !== null}
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm font-black text-white outline-none focus:border-primary/50 disabled:opacity-40"
+              />
+              <span className="text-[10px] text-white/40 font-bold uppercase">USDC</span>
+            </div>
+            <button onClick={() => void onSupply()} disabled={busy !== null || supplyAmount <= 0} className="w-full py-3 rounded-xl bg-primary text-black font-black text-[11px] uppercase tracking-[0.15em] hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+              {sameFlow(busy, "supply") ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sprout className="w-4 h-4" />} Supply &amp; Earn
+            </button>
           </div>
 
           {/* Loans */}

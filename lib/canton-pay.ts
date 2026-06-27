@@ -131,6 +131,13 @@ export interface RepayContext { loanCid: string; payTokenCid: string; poolCid: s
 /** Mint test USDC to the wallet (operator-signed; no user signature needed). */
 export const faucet = (party: string, amount = 100) => jpost<{ balance: number }>("/v1/wallet/faucet", { party, amount })
 
+/** Supply USDC to the yield pool to earn yield (demo: operator-mediated like the
+ * faucet; the on-ledger effect is a REAL SupplyRequest+accept → PoolShare). */
+export const supply = (party: string, amount: number) => jpost<{ shares: number; amount: number; status: string }>("/v1/wallet/supply", { party, amount })
+
+/** Redeem the wallet's yield position back to USDC. */
+export const redeemYield = (party: string) => jpost<{ status: string; balance: number }>("/v1/wallet/redeem", { party })
+
 /** Read the wallet's full on-ledger position. */
 export async function getPositions(party: string): Promise<Positions> {
   const r = await fetch(`${B2B_API_URL}/v1/wallet/positions?party=${encodeURIComponent(party)}`)
