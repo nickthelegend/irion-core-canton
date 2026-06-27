@@ -9,7 +9,7 @@
     "start": "next start",
     "deploy:contracts": "node scripts/quick-deploy.js",
     "seed-db": "ts-node scripts/seed-db.ts",
-    "test": "node --import tsx --test lib/*.test.ts"
+    "test": "node --import tsx --test \"lib/**/*.test.ts\" \"components/**/*.test.tsx\""
   },
   "dependencies": {
     "@apollo/client": "^4.1.4",
