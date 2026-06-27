@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "next start",
     "deploy:contracts": "node scripts/quick-deploy.js",
-    "seed-db": "ts-node scripts/seed-db.ts"
+    "seed-db": "ts-node scripts/seed-db.ts",
+    "test": "node --import tsx --test lib/*.test.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.1.4",
@@ -97,6 +98,7 @@
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
   }
