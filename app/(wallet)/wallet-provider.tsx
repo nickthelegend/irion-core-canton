@@ -12,7 +12,7 @@ import {
   fetchOperatorParty, buildBnplCommand, completeBorrow, faucet, getPositions,
   repayContext, buildRepayCommand, type Positions, type ConsumerLoan,
   lendContext, lendEscrow, lendComplete, buildSupplyEscrowCommand, buildSupplyRequestCommand,
-  withdrawContext, buildWithdrawRequestCommand, withdrawComplete,
+  withdrawContext, buildWithdrawRequestCommand, withdrawComplete, simulateYield,
 } from "@/lib/canton-pay"
 import { Ctx, Warn, type Flow, type WalletCtx } from "./wallet"
 
@@ -95,8 +95,14 @@ function Inner({ children }: { children: React.ReactNode }) {
   }
   const onRepay = async (loan: ConsumerLoan) => { if (!party) return; setBusy({ repay: loan.id }); try { const ctx = await repayContext(party.partyId, loan.id, loan.outstanding); toast.info("Approve repayment in Carpincho…"); await execute({ commands: [buildRepayCommand(party.partyId, ctx, loan.outstanding)], disclosedContracts: ctx.disclosed }); toast.success("Repaid ✓"); await reload() } catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) } }
 
+  const onSimulateYield = async () => {
+    if (!party) return; setBusy("yield")
+    try { await simulateYield(party.partyId); toast.success("Yield simulated ✓ — your supplied value grew"); await reload() }
+    catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) }
+  }
+
   const doConnect = () => void connect("extension").catch((e) => toast.error(errMsg(e)))
-  const value: WalletCtx = { party: party?.partyId, operator, positions, loading, busy, reload, isConnected: !!isConnected && !!party, connect: doConnect, onFaucet, onBorrow, onRepay, onLend, onRedeem }
+  const value: WalletCtx = { party: party?.partyId, operator, positions, loading, busy, reload, isConnected: !!isConnected && !!party, connect: doConnect, onFaucet, onBorrow, onRepay, onLend, onRedeem, onSimulateYield }
 
   // Minimal chrome: a connect-gate. Each wallet page (/borrow, /credit, …) renders
   // its own full layout; the header provides nav. Carpincho persists across pages.

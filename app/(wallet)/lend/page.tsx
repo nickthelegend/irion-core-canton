@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Sprout, ArrowUpFromLine, Loader2, TrendingUp, Coins } from "lucide-react"
+import { Sprout, ArrowUpFromLine, Loader2, TrendingUp, Coins, Sparkles } from "lucide-react"
 import { useWallet, sameFlow, fmt } from "../wallet"
 
 export default function LendPage() {
-  const { positions, busy, onLend, onRedeem } = useWallet()
+  const { positions, busy, onLend, onRedeem, onSimulateYield } = useWallet()
   const [amount, setAmount] = useState("")
   const bal = positions?.balance ?? 0
   const yShares = positions?.yield.shares ?? 0
@@ -55,6 +55,9 @@ export default function LendPage() {
             {yShares > 0 ? (
               <>
                 <div><div className="text-3xl font-light tracking-tighter">{fmt(yValue)} <span className="text-sm text-foreground/40">USDC</span></div><div className="text-[10px] text-foreground/40 uppercase tracking-widest mt-1">{fmt(yShares)} pool shares</div></div>
+                <button onClick={() => void onSimulateYield()} disabled={busy !== null} className="w-full py-3 rounded-xl bg-primary/10 border border-primary/30 text-primary font-black text-[11px] uppercase tracking-widest hover:bg-primary/20 disabled:opacity-40 flex items-center justify-center gap-2">
+                  {sameFlow(busy, "yield") ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} Simulate Yield
+                </button>
                 <button onClick={() => void onRedeem()} disabled={busy !== null} className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-widest hover:bg-white/10 disabled:opacity-40 flex items-center justify-center gap-2">
                   {sameFlow(busy, "redeem") ? <Loader2 size={14} className="animate-spin" /> : <ArrowUpFromLine size={14} />} Withdraw all
                 </button>

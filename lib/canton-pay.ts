@@ -234,3 +234,7 @@ export function buildWithdrawRequestCommand(opts: { operator: string; supplier: 
 }
 export const withdrawComplete = (party: string) =>
   jpost<{ status: string; balance: number }>("/v1/wallet/withdraw/complete", { party })
+
+/** Demo: inject yield into the pool (operator-side) — lifts every supplier's share value. */
+export const simulateYield = (party: string, amount?: number) =>
+  jpost<{ injected: number; poolValue: number; yield?: { value: number } }>("/v1/wallet/yield/simulate", { party, amount })

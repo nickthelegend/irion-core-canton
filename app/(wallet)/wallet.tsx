@@ -13,7 +13,7 @@ export const short = (s: string, head = 12, tail = 8): string =>
 export const fmt = (n: number | undefined): string =>
   typeof n === "number" && Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "—"
 
-export type Flow = "faucet" | "borrow" | "supply" | "redeem" | { repay: string }
+export type Flow = "faucet" | "borrow" | "supply" | "redeem" | "yield" | { repay: string }
 export const sameFlow = (a: Flow | null, b: Flow): boolean => {
   if (a === null) return false
   if (typeof a === "string" || typeof b === "string") return a === b
@@ -34,6 +34,7 @@ export interface WalletCtx {
   onRepay: (loan: ConsumerLoan) => Promise<void>
   onLend: (amount: number) => Promise<void>
   onRedeem: () => Promise<void>
+  onSimulateYield: () => Promise<void>
 }
 export const Ctx = createContext<WalletCtx | null>(null)
 export function useWallet(): WalletCtx {
