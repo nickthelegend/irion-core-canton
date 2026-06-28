@@ -213,3 +213,24 @@ export function buildSupplyRequestCommand(opts: { operator: string; supplier: st
 /** After the shopper signs both steps, the operator accepts → a PoolShare (yield position). */
 export const completeSupply = (party: string) =>
   jpost<{ status: string; supplier: string; shares: number }>("/v1/wallet/supply/complete", { party })
+
+// ── Self-custody LEND (earn yield) — works for external wallets in two solo signs:
+// (1) transfer a token whole to the operator (reuses buildSupplyEscrowCommand), then
+// (2) sign a SupplyRequest referencing the operator-carved escrow (buildSupplyRequestCommand).
+export interface LendContext { sourceTokenCid: string; sourceAmount: number; operator: string; usdcIssuer: string }
+export const lendContext = (party: string, amount: number) =>
+  jpost<LendContext>("/v1/wallet/lend/context", { party, amount })
+export const lendEscrow = (party: string, amount: number, sourceAmount: number) =>
+  jpost<{ escrowCid: string; operator: string; usdcIssuer: string }>("/v1/wallet/lend/escrow", { party, amount, sourceAmount })
+export const lendComplete = (party: string) =>
+  jpost<{ shares: number; balance: number }>("/v1/wallet/lend/complete", { party })
+
+// ── Self-custody WITHDRAW (redeem yield): wallet solo-signs a WithdrawRequest. ──
+const WITHDRAW_REQUEST_TID = "#irion-model:Irion.Pool:WithdrawRequest"
+export const withdrawContext = (party: string) =>
+  jpost<{ shareCid: string; operator: string }>("/v1/wallet/withdraw/context", { party })
+export function buildWithdrawRequestCommand(opts: { operator: string; supplier: string; shareCid: string }): unknown {
+  return { CreateCommand: { templateId: WITHDRAW_REQUEST_TID, createArguments: { operator: opts.operator, supplier: opts.supplier, shareCid: opts.shareCid } } }
+}
+export const withdrawComplete = (party: string) =>
+  jpost<{ status: string; balance: number }>("/v1/wallet/withdraw/complete", { party })

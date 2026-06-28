@@ -32,7 +32,7 @@ export interface WalletCtx {
   onFaucet: (amount?: number) => Promise<void>
   onBorrow: (amount: number) => Promise<void>
   onRepay: (loan: ConsumerLoan) => Promise<void>
-  onSupply: (amount: number) => Promise<void>
+  onLend: (amount: number) => Promise<void>
   onRedeem: () => Promise<void>
 }
 export const Ctx = createContext<WalletCtx | null>(null)

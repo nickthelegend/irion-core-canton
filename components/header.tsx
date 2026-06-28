@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 // them never drops the wallet.
 const NAV = [
   { href: "/borrow", label: "Borrow" },
+  { href: "/lend", label: "Lend" },
   { href: "/credit", label: "Credit" },
   { href: "/positions", label: "Positions" },
   { href: "/activity", label: "Activity" },
