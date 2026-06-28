@@ -6,16 +6,22 @@ import { usePathname } from "next/navigation"
 import { Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// The wallet is split into separate routes (like xorr-core). They share one
+// Carpincho connection via the (wallet) route-group layout, so switching between
+// them never drops the wallet.
 const NAV = [
-  { href: "/app", label: "Wallet" },
-  { href: "/docs", label: "Docs" },
+  { href: "/borrow", label: "Borrow" },
+  { href: "/credit", label: "Credit" },
+  { href: "/positions", label: "Positions" },
+  { href: "/activity", label: "Activity" },
+  { href: "/faucet", label: "Faucet" },
 ]
 
 export function AppHeader() {
   const pathname = usePathname()
 
-  // /pay (checkout) + /app (wallet) are Canton — they have their own Carpincho connect.
-  if (pathname?.startsWith("/pay") || pathname?.startsWith("/app")) return null
+  // Only the /pay checkout is chrome-free.
+  if (pathname?.startsWith("/pay")) return null
 
   return (
     <header className="sticky top-0 z-40 w-full pt-3 pb-2 ">
@@ -34,28 +40,30 @@ export function AppHeader() {
           </Link>
         </div>
 
-        {/* Center: nav */}
-        <nav className="hidden sm:flex items-center justify-center gap-2">
-          {NAV.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className={cn(
-                "rounded-xl px-3 py-1 text-sm transition-colors",
-                pathname === n.href
-                  ? "bg-primary text-black"
-                  : "text-foreground/80 hover:text-foreground hover:bg-primary/15",
-              )}
-            >
-              {n.label}
-            </Link>
-          ))}
+        {/* Center: wallet routes (Borrow · Credit · Positions · Activity · Faucet) */}
+        <nav className="hidden md:flex items-center justify-center gap-1">
+          {NAV.map((n) => {
+            const active = pathname === n.href
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={cn(
+                  "rounded-xl px-3 py-1.5 text-sm font-bold transition-colors",
+                  active ? "bg-primary text-black" : "text-foreground/75 hover:text-foreground hover:bg-primary/15",
+                )}
+              >
+                {n.label}
+              </Link>
+            )
+          })}
         </nav>
 
-        {/* Right: open the Canton wallet */}
+        {/* Right: Docs + open the Canton wallet */}
         <div className="flex items-center justify-end gap-3 min-w-0">
+          <Link href="/docs" className="hidden lg:inline text-sm text-foreground/55 hover:text-foreground transition-colors">Docs</Link>
           <Link
-            href="/app"
+            href="/borrow"
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-black uppercase tracking-widest text-black transition-transform hover:scale-[1.03]"
           >
             <Wallet size={15} /> Open Wallet
