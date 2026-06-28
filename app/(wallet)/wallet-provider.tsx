@@ -10,7 +10,7 @@ import { ConnectKitProvider, useConnect, useExecute, useParty } from "@/lib/cant
 import type { ConnectKitConfig } from "@/lib/canton-connect-kit"
 import {
   fetchOperatorParty, buildBnplCommand, completeBorrow, faucet, getPositions,
-  repay, supply, redeemYield, type Positions, type ConsumerLoan,
+  repayContext, buildRepayCommand, supply, redeemYield, type Positions, type ConsumerLoan,
 } from "@/lib/canton-pay"
 import { Ctx, Warn, type Flow, type WalletCtx } from "./wallet"
 
@@ -68,7 +68,7 @@ function Inner({ children }: { children: React.ReactNode }) {
   const onBorrow = async (amount: number) => { if (!party || operator === undefined || amount <= 0) return; setBusy("borrow"); try { toast.info("Approve in Carpincho…"); await execute({ commands: [buildBnplCommand({ operator, borrower: party.partyId, amount })] }); await completeBorrow(party.partyId); toast.success(`Borrowed ${amount} USDC`); await reload() } catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) } }
   const onSupply = async (amount: number) => { if (!party || amount <= 0) return; setBusy("supply"); try { const r = await supply(party.partyId, amount); toast.success(`Supplied ${amount} USDC · ${r.shares} shares`); await reload() } catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) } }
   const onRedeem = async () => { if (!party) return; setBusy("redeem"); try { await redeemYield(party.partyId); toast.success("Redeemed yield to USDC"); await reload() } catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) } }
-  const onRepay = async (loan: ConsumerLoan) => { if (!party) return; setBusy({ repay: loan.id }); try { await repay(party.partyId, loan.id, loan.outstanding); toast.success("Repaid ✓"); await reload() } catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) } }
+  const onRepay = async (loan: ConsumerLoan) => { if (!party) return; setBusy({ repay: loan.id }); try { const ctx = await repayContext(party.partyId, loan.id, loan.outstanding); toast.info("Approve repayment in Carpincho…"); await execute({ commands: [buildRepayCommand(party.partyId, ctx, loan.outstanding)], disclosedContracts: ctx.disclosed }); toast.success("Repaid ✓"); await reload() } catch (e) { toast.error(errMsg(e)) } finally { setBusy(null) } }
 
   const doConnect = () => void connect("extension").catch((e) => toast.error(errMsg(e)))
   const value: WalletCtx = { party: party?.partyId, operator, positions, loading, busy, reload, isConnected: !!isConnected && !!party, connect: doConnect, onFaucet, onBorrow, onRepay, onSupply, onRedeem }

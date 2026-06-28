@@ -126,7 +126,7 @@ export interface Positions {
   loans: ConsumerLoan[]
   credit: { creditLimit: number; outstanding: number; available?: number; score: number } | null
 }
-export interface RepayContext { loanCid: string; payTokenCid: string; poolCid: string; profileCid: string; configCid: string }
+export interface RepayContext { loanCid: string; payTokenCid: string; poolCid: string; profileCid: string; configCid: string; disclosed?: unknown[] }
 
 /** Mint test USDC to the wallet (operator-signed; no user signature needed). */
 export const faucet = (party: string, amount = 100) => jpost<{ balance: number }>("/v1/wallet/faucet", { party, amount })
@@ -154,11 +154,6 @@ export const completeBorrow = (party: string) => jpost<BnplResult>("/v1/wallet/b
 export const repayContext = (party: string, loanId: string, amount: number) =>
   jpost<RepayContext>("/v1/wallet/repay/context", { party, loanId, amount })
 
-/** Repay a loan. Operator-co-signed: Loan_Pay must reference the ProtocolConfig +
- * LendingPool (operator-signatory contracts the borrower can't see), so a
- * wallet-only signature fails to resolve them. The borrower's own token still pays. */
-export const repay = (party: string, loanId: string, amount: number) =>
-  jpost<{ status: string; balance: number }>("/v1/wallet/repay", { party, loanId, amount })
 
 /** Build the user-signed Loan_Pay command (repay). */
 export function buildRepayCommand(party: string, ctx: RepayContext, amount: number): unknown {
