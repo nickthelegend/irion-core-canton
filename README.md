@@ -1,80 +1,114 @@
 # Irion Core
 
-**The Irion consumer app — a self-custody wallet and hosted credit/BNPL checkout on the Canton Network.**
+### Buy Now, Pay Never.
+
+The consumer app for **Irion** — private consumer credit on the **Canton Network**. A self-custody
+wallet and a Stripe-style hosted checkout, both settling real transactions against the Irion Daml
+protocol. Positions are **private by construction**: your loans, credit score, and pool shares live
+in Daml contracts visible only to you and the operator — no zero-knowledge circuits, no public
+ledger trail.
+
+> Part of the Irion monorepo. Sibling repos: [`irion-b2b-api`](../irion-b2b-api) (the REST API this
+> app calls), [`irion-contracts-canton`](../irion-contracts-canton) (the Daml protocol),
+> [`irion-merchant-app-canton`](../irion-merchant-app-canton) (the merchant console that issues
+> checkout bills), and [`irion-sdk-canton`](../irion-sdk-canton) (the drop-in shops use to create
+> those bills).
 
 ---
 
 ## What it is
 
-The consumer-facing surface of Irion's "Buy Now, Pay Never" protocol. Two products in one Next.js 15
-app, both settling real transactions on the Canton ledger via the [Irion B2B API](../irion-b2b-api):
+A single Next.js 15 app serving three consumer surfaces:
 
-- **`/app` — Carpincho wallet (self-custody).** A consumer wallet where the user holds their own
-  Canton external-party key (CIP-0103 style). The app *prepares* commands, the **user signs**, then
-  the operator *executes* — the platform never holds the consumer's key. Features: a USDC **faucet**,
-  **borrow** against an attested credit line (signs an `UnsecuredRequest`), **repay** an open loan,
-  and live on-ledger **positions**.
-- **`/pay/[hash]` — hosted checkout.** A Stripe-style hosted payment page a merchant redirects to.
-  Three methods:
-  - **Pay with Private Credit** — the shopper's attested credit line covers it; income & balances
-    stay private by construction.
-  - **Buy Now, Pay Never (BNPL)** — the lending pool pays the merchant now; the shopper repays from
-    yield, anytime.
-  - **Pay in Full (Direct)** — a **real shopper-signed `Token_Transfer`** of USDC to the merchant.
+- **Marketing landing** at `/` — the "Buy Now, Pay Never" hero, how-it-works, and FAQ.
+- **The wallet** at `/app` — a self-custody **Carpincho** wallet, split into focused routes that
+  share one ledger connection.
+- **Hosted checkout** at `/pay/[hash]` — the payment page a merchant redirects shoppers to.
 
-  On success it posts an `IRION_PAYMENT_RESULT` message back to the opener window (used by the
-  `@irion/sdk` drop-in).
+Brand: lime-green accent (`#a6f24a`) on near-black, with mono + Inter type.
 
-It also hosts a small **bills API** (`/api/bills/create`, `/api/bills/[hash]`, MongoDB) used by the
-demo storefront chain; `/api/bills/[hash]` falls back to the merchant app when a bill isn't found
-locally.
+## The wallet
 
-Privacy is **by construction**: a borrower's `CreditProfile`/`CreditAttestation` live in Daml
-contracts visible only to the borrower and the operator — this replaces the project's old
-zero-knowledge design.
+`/app` redirects to `/borrow`. All wallet routes live under a `(wallet)` route group, so they share
+a single wallet connection (one connect, navigate freely). The header nav is **Borrow · Lend ·
+Credit · Positions · Activity · Faucet**.
 
-## Run
+| Route | What you do |
+|---|---|
+| **`/borrow`** | Draw on a private credit line — sign an `UnsecuredRequest`. |
+| **`/lend`** | Supply USDC to the lending pool to earn yield, and withdraw. Includes a "Simulate Yield" demo button. Self-custody (two signatures). |
+| **`/credit`** | Your private credit score and limit dashboard. |
+| **`/positions`** | A table of open loans and your pool position. |
+| **`/activity`** | An on-ledger activity feed. |
+| **`/faucet`** | Mint test USDC to play with. |
+
+Every wallet action is **self-custody (CIP-0103)**: the app builds the exact command, **Carpincho
+signs it**, and the operator executes — the platform never holds your key. Wallet flows route through
+Carpincho → the Irion wallet-service gateway → the [b2b-api](../irion-b2b-api) on `:8088`.
+
+`lib/canton-pay.ts` builds the precise commands the shopper signs — `buildBnplCommand`,
+`buildRepayCommand`, `buildDirectCommand`, `buildSupplyEscrowCommand`, `buildSupplyRequestCommand`,
+`buildWithdrawRequestCommand` — and is unit-tested.
+
+## How checkout works
+
+A shop creates a bill through the [`@irion/sdk`](../irion-sdk-canton) →
+[merchant](../irion-merchant-app-canton) chain, then redirects the shopper to `/pay/[hash]`. The
+checkout offers three methods, each signed by the shopper via Carpincho:
+
+- **Direct** — a real shopper-signed `Token_Transfer` of USDC to the merchant.
+- **BNPL** — the lending pool pays the merchant now; the shopper repays from yield, anytime.
+- **Credit** — the shopper's private credit line covers it; income and balances stay private.
+
+On success the page posts an `IRION_PAYMENT_RESULT` message back to the opener window — what the
+`@irion/sdk` drop-in listens for.
+
+## Privacy by construction
+
+Privacy isn't bolted on — it's how Canton works. A Daml contract is visible only to its signatory
+and observer parties. A borrower's `CreditProfile` / `CreditAttestation` are signed by the operator
+and observed only by the borrower, so a credit score, a loan, or a pool position is never visible to
+anyone else and never written to a public ledger. The synchronizer that orders transactions sees
+only encrypted commitments. This replaces the project's earlier zero-knowledge design.
+
+## Getting started
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000   (Next.js dev server)
-# npm run build && npm start   # production
+npm run dev -- -p 3000      # http://localhost:3000
 ```
 
-**Core MUST run on `:3000`** — other apps hardcode cross-app URLs to it, and the b2b-api allows
-`:3000` as a passkey/CORS origin.
+**Core MUST run on `:3000`.** Cross-app URLs hardcode it, and the b2b-api allows `:3000` as a
+passkey/CORS origin.
 
-### Environment (`.env.local`)
+You also need:
 
-| Var | Purpose |
-|---|---|
-| `NEXT_PUBLIC_B2B_API_URL` | Irion B2B API base (operator party + ledger calls) — default `http://localhost:8088` |
-| `MONGODB_URI` / `MONGODB_DB` | data layer for `app/api/bills/**` (via `lib/mongodb.ts`) |
-| `MERCHANT_APP_URL` | cross-app bill resolution: `/api/bills/[hash]` falls back to the merchant app (default `http://localhost:3004`) |
+- **[`irion-b2b-api`](../irion-b2b-api) running on `:8088`** — the API the wallet and checkout call.
+- **Carpincho** with its `walletServiceRpcUrl` pointed at the Irion wallet-service gateway, so
+  prepare → sign → execute works end to end.
 
-## How it fits the system
+## Testing
 
-```
-shopping storefront ──(@irion/sdk)──► merchant /api ──► creates a bill
-                                                          │
-consumer  ───────────────────────────────────────────────► core /pay/[hash]  (Direct / BNPL / Credit)
-                                                          │
-core /app + /pay  ── prepare → user signs → execute ─────► irion-b2b-api :8088 ─► Canton ledger ─► Irion Daml protocol
+```bash
+npm test      # node:test via tsx
 ```
 
-- The wallet + checkout call `../irion-b2b-api`'s public `/v1/wallet/*` and `/pay/*` endpoints; the
-  shopper signs, the operator mediates the protocol side.
-- The Daml protocol behind it lives in `../irion-contracts-canton`.
+Covers the `lib/canton-pay.ts` command builders (the exact payloads the shopper signs, including
+consumer supply) plus a Badge component render test.
 
-## Layout
+## Project layout
 
 | Path | What |
 |---|---|
-| `app/app/` | Carpincho wallet (`ConsumerApp.tsx`) |
-| `app/pay/[hash]/` | hosted checkout (`CantonCheckout.tsx`) |
-| `app/api/bills/` | bills create/resolve API (MongoDB) |
-| `lib/canton-pay.ts` | command builders + prepare/execute helpers against the b2b-api |
-| `lib/canton-connect-kit/`, `lib/mongodb.ts` | wallet connect glue · Mongo client |
+| `app/page.tsx` | Marketing landing (`/`). |
+| `app/(wallet)/` | The wallet route group — `borrow`, `lend`, `credit`, `positions`, `activity`, `faucet`, sharing one connection. |
+| `app/app/page.tsx` | Redirects `/app` → `/borrow`. |
+| `app/pay/[hash]/` | Hosted checkout (`CantonCheckout.tsx`) — Direct / BNPL / Credit. |
+| `app/api/bills/` | Bill create/resolve endpoints used by the storefront chain (MongoDB). |
+| `lib/canton-pay.ts` | Command builders + prepare/execute helpers against the b2b-api (unit-tested). |
+| `lib/canton-connect-kit/` | Carpincho wallet connect glue (CIP-0103). |
 
-> **Note (Canton-only):** all Stellar / Soroban / Privy / ZK code was purged in the 2026-06-26 audit;
-> this app is Canton-only.
+---
+
+> **Canton-only.** All Stellar / Soroban / Privy / ZK code was purged in the 2026-06-26 audit. This
+> app talks to one ledger: Canton.
