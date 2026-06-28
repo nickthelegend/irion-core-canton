@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ShieldCheck, TrendingUp, Database, Loader2, Coins, CreditCard, RefreshCw, Sprout } from "lucide-react"
+import { ShieldCheck, TrendingUp, Database, Loader2, Coins, CreditCard, RefreshCw, Sprout, ArrowUpRight } from "lucide-react"
 import { useWallet, short, fmt } from "../wallet"
 
 export default function PositionsPage() {
@@ -37,17 +37,17 @@ export default function PositionsPage() {
         ))}
       </div>
 
-      {/* Earn — runs in the business console (self-custody supply needs the one-sig SupplyDirect choice). */}
-      <div className="bg-[#0d0f14] border border-border/30 rounded-3xl p-6 flex items-start gap-4">
-        <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0"><Sprout size={18} /></div>
-        <div>
-          <div className="text-sm font-black uppercase tracking-widest text-white">Earn — Supply to Pool</div>
-          <p className="text-[11px] text-foreground/50 mt-1.5 leading-relaxed max-w-2xl">
-            Supplying yield from a self-custody wallet takes a one-signature on-ledger step (<span className="text-primary/70">SupplyDirect</span>) shipping in the next Daml release — the operator can&apos;t move your funds for you. For now, treasury yield runs in the{" "}
-            <a href="http://localhost:3006/app" target="_blank" rel="noreferrer" className="text-primary hover:underline">business console (Meridian)</a>. Borrow, repay, and pay-with-credit all work here.
-          </p>
+      {/* Earn — supply lives on the dedicated Lend tab. */}
+      <Link href="/lend" className="bg-[#0d0f14] border border-primary/20 rounded-3xl p-6 flex items-center justify-between hover:bg-primary/[0.04] transition-colors group">
+        <div className="flex items-start gap-4">
+          <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0"><Sprout size={18} /></div>
+          <div>
+            <div className="text-sm font-black uppercase tracking-widest text-white">Earn — Supply to Pool</div>
+            <p className="text-[11px] text-foreground/50 mt-1.5 leading-relaxed max-w-2xl">Supply idle USDC to the Irion pool and earn borrower interest — a real on-ledger PoolShare you can withdraw anytime. Open the <span className="text-primary">Lend</span> tab.</p>
+          </div>
         </div>
-      </div>
+        <ArrowUpRight className="text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" size={18} />
+      </Link>
 
       {/* positions table */}
       <div className="bg-card/20 border border-border/40 rounded-3xl overflow-hidden backdrop-blur-sm shadow-2xl">
