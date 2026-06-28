@@ -1,20 +1,17 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { ShieldCheck, TrendingUp, Database, Loader2, Coins, CreditCard, RefreshCw, Sprout, ArrowUpFromLine } from "lucide-react"
-import { useWallet, sameFlow, short, fmt } from "../wallet"
+import { ShieldCheck, TrendingUp, Database, Loader2, Coins, CreditCard, RefreshCw, Sprout } from "lucide-react"
+import { useWallet, short, fmt } from "../wallet"
 
 export default function PositionsPage() {
-  const { positions, loading, busy, reload, onSupply, onRedeem } = useWallet()
-  const [supplyAmount, setSupplyAmount] = useState("")
+  const { positions, loading, reload } = useWallet()
 
   const loans = positions?.loans ?? []
   const yieldShares = positions?.yield.shares ?? 0
   const yieldValue = positions?.yield.value ?? 0
   const totalBorrowed = loans.reduce((s, p) => s + p.outstanding, 0)
   const score = positions?.credit?.score ?? 0
-  const amt = Number(supplyAmount)
 
   type Row = { id: string; label: string; kind: string; amount: number; supply: boolean }
   const rows: Row[] = [
@@ -40,24 +37,15 @@ export default function PositionsPage() {
         ))}
       </div>
 
-      {/* Supply to earn */}
-      <div className="bg-[#0d0f14] border border-primary/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-end gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary mb-2"><Sprout size={14} /> Supply to Pool — Earn Yield</div>
-          <div className="bg-[#05080f]/60 border border-border/20 rounded-2xl p-4 focus-within:border-primary/40 flex items-center gap-3">
-            <input type="number" value={supplyAmount} onChange={(e) => setSupplyAmount(e.target.value)} placeholder="0.00" className="flex-1 bg-transparent text-2xl font-light tracking-tighter placeholder:text-foreground/20 focus:outline-none min-w-0" />
-            <span className="text-sm font-semibold text-white/60">USDC</span>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => { if (amt > 0) void onSupply(amt).then(() => setSupplyAmount("")) }} disabled={busy !== null || !(amt > 0)} className="px-5 h-11 rounded-xl bg-primary text-black text-[11px] font-black uppercase tracking-widest hover:scale-[1.02] disabled:opacity-40 flex items-center gap-2">
-            {sameFlow(busy, "supply") ? <Loader2 size={14} className="animate-spin" /> : <Sprout size={14} />} Supply
-          </button>
-          {yieldShares > 0 && (
-            <button onClick={() => void onRedeem()} disabled={busy !== null} className="px-5 h-11 rounded-xl bg-white/5 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest hover:bg-white/10 disabled:opacity-40 flex items-center gap-2">
-              {sameFlow(busy, "redeem") ? <Loader2 size={14} className="animate-spin" /> : <ArrowUpFromLine size={14} />} Redeem
-            </button>
-          )}
+      {/* Earn — runs in the business console (self-custody supply needs the one-sig SupplyDirect choice). */}
+      <div className="bg-[#0d0f14] border border-border/30 rounded-3xl p-6 flex items-start gap-4">
+        <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0"><Sprout size={18} /></div>
+        <div>
+          <div className="text-sm font-black uppercase tracking-widest text-white">Earn — Supply to Pool</div>
+          <p className="text-[11px] text-foreground/50 mt-1.5 leading-relaxed max-w-2xl">
+            Supplying yield from a self-custody wallet takes a one-signature on-ledger step (<span className="text-primary/70">SupplyDirect</span>) shipping in the next Daml release — the operator can&apos;t move your funds for you. For now, treasury yield runs in the{" "}
+            <a href="http://localhost:3006/app" target="_blank" rel="noreferrer" className="text-primary hover:underline">business console (Meridian)</a>. Borrow, repay, and pay-with-credit all work here.
+          </p>
         </div>
       </div>
 
